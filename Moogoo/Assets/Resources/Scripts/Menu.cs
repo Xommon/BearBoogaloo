@@ -1,25 +1,22 @@
 using UnityEngine;
-using Unity.Netcode;
 using UnityEngine.UI;
+using TMPro;
 
 public class Menu : MonoBehaviour
 {
-    [SerializeField] private Button hostButton;
-    [SerializeField] private Button joinButton;
+    public TMP_InputField inputField;
+    public Button soloButton;
+    public Button hostButton;
+    public Button joinButton;
 
-    private void Start()
+    void Update()
     {
-        hostButton.onClick.AddListener(HostButtonOnClick);
-        joinButton.onClick.AddListener(JoinButtonOnClick);
+        hostButton.enabled = inputField.text != "";
+        joinButton.enabled = inputField.text != "";
     }
 
-    private void HostButtonOnClick()
+    public void SoloButton()
     {
-        NetworkManager.Singleton.StartHost();
-    }
-
-    private void JoinButtonOnClick()
-    {
-        NetworkManager.Singleton.StartClient();
+        gameObject.SetActive(false);
     }
 }

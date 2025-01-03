@@ -1,0 +1,132 @@
+using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System;
+
+public class AI : MonoBehaviour
+{
+    public GameManager gameManager;
+    public PlayerEntry playerData;
+    private int playerIndex;
+
+    void Start()
+    {
+        playerIndex = transform.GetSiblingIndex();
+    }
+
+    public IEnumerator PlayTurn()
+    {
+        // Analyse cards in hand
+        yield return new WaitForSeconds(1.5f);
+        int[] strongestBoard = new int[] { 0, 0 };
+        int[] backupBoard = new int[] { 0, 0 };
+        int[] lowestBoard = new int[] { 0, int.MaxValue };
+        int strongestCardIndex = -1;
+        int backupCardIndex = -1;
+        int lowestCardIndex = -1;
+
+        for (int i = 0; i < playerData.hand.Count; i++)
+        {
+            string[] cardValues = playerData.hand[i].Split(":");
+            int boardNumber = int.Parse(cardValues[0]);
+            int cardValue = int.Parse(cardValues[1]);
+
+            int[] currentBoard = new int[] { boardNumber, cardValue };
+
+            // Evaluate the strongest and backup cards
+            if (currentBoard[1] > strongestBoard[1])
+            {
+                backupBoard = strongestBoard;
+                strongestBoard = currentBoard;
+
+                backupCardIndex = strongestCardIndex;
+                strongestCardIndex = i;
+            }
+            else if (currentBoard[1] > backupBoard[1])
+            {
+                backupBoard = currentBoard;
+                backupCardIndex = i;
+            }
+
+            // Identify the lowest value card
+            if (currentBoard[1] < lowestBoard[1])
+            {
+                lowestBoard = currentBoard;
+                lowestCardIndex = i;
+            }
+        }
+
+        // Evaluate board state
+        Board targetBoard = gameManager.boards.FirstOrDefault(board => board.boardNumber == strongestBoard[0]);
+        Board backupTargetBoard = gameManager.boards.FirstOrDefault(board => board.boardNumber == backupBoard[0]);
+        Board lowestTargetBoard = gameManager.boards.FirstOrDefault(board => board.boardNumber == lowestBoard[0]);
+
+        // Skip betting if all boards are full
+        if (gameManager.boards.All(board => board.bets.Count >= gameManager.maxBet))
+        {
+            yield return new WaitForSeconds(1.5f);
+        }
+        else
+        {
+            // Choose where to place the bet strategically
+            int betIndex = strongestBoard[0];
+
+            if (targetBoard != null && backupTargetBoard != null)
+            {
+                if (targetBoard.value > backupTargetBoard.value && targetBoard.value - backupTargetBoard.value <= 2)
+                {
+                    betIndex = backupBoard[0];
+                }
+            }
+
+            // Place low-value card on board with fewer bets, respecting maxBet limit
+            if (lowestTargetBoard != null && lowestTargetBoard.bets.Count < gameManager.maxBet)
+            {
+                betIndex = lowestBoard[0];
+            }
+
+            Board betBoard = gameManager.boards.FirstOrDefault(board => board.boardNumber == betIndex);
+            if (betBoard != null && betBoard.bets.Count < gameManager.maxBet)
+            {
+                betBoard.bets.Add(playerIndex);
+            }
+            else
+            {
+                Board fallbackBoard = gameManager.boards.FirstOrDefault(board => board.bets.Count < gameManager.maxBet);
+                if (fallbackBoard != null)
+                {
+                    fallbackBoard.bets.Add(playerIndex);
+                }
+            }
+        }
+
+        // Decide which card to play based on board conditions
+        yield return new WaitForSeconds(1.5f);
+        if (backupTargetBoard != null && targetBoard != null)
+        {
+            if (targetBoard.value - backupTargetBoard.value <= 3)
+            {
+                gameManager.boards.FirstOrDefault(board => board.boardNumber == backupBoard[0]).value = backupBoard[1];
+                playerData.hand.RemoveAt(backupCardIndex);
+            }
+            else
+            {
+                gameManager.boards.FirstOrDefault(board => board.boardNumber == strongestBoard[0]).value = strongestBoard[1];
+                playerData.hand.RemoveAt(strongestCardIndex);
+            }
+        }
+        else
+        {
+            gameManager.boards.FirstOrDefault(board => board.boardNumber == strongestBoard[0]).value = strongestBoard[1];
+            playerData.hand.RemoveAt(strongestCardIndex);
+        }
+
+        // Draw a new card
+        gameManager.DealCards(1, playerIndex);
+
+        // End turn
+        yield return new WaitForSeconds(1.5f);
+        gameManager.NextTurn();
+    }
+}

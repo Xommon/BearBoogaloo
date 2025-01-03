@@ -1,29 +1,19 @@
 using UnityEngine;
 using Unity.Netcode;
 
-[ExecuteAlways]
 public class Player : NetworkBehaviour
 {
-    public string name;
+    public string playerName;
     public Color colour;
-    public int points;
+    public int score;
 
     void Update()
     {
-        gameObject.name = name;
-
-        if (!IsOwner)
+        // Change name of player object
+        gameObject.name = "Player";
+        if (playerName != "")
         {
-            return;
-        }
-    }
-
-    // Start
-    public override void OnNetworkSpawn()
-    {
-        if (!IsOwner)
-        {
-            return;
+            gameObject.name += ": " + playerName;
         }
     }
 }
