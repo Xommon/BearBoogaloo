@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 
 public class GameManager : MonoBehaviour
@@ -18,6 +19,8 @@ public class GameManager : MonoBehaviour
     public int turn;
     public Hand hand;
     public Sprite[] icons;
+    public Sprite[] reactionImages;
+    public AnimationClip[] reactionAnimations;
 
     // Game settings
     public int maxBet;
@@ -59,6 +62,15 @@ public class GameManager : MonoBehaviour
             if (!boards[i].gameObject.activeInHierarchy)
             {
                 boards.RemoveAt(i);
+            }
+        }
+
+        for (int i = 1; i < 4; i++)
+        {
+            // Check if the number key is pressed
+            if (Input.GetKeyDown((KeyCode)((int)KeyCode.Alpha0 + i)))
+            {
+                players[0].React(i - 1);
             }
         }
     }
@@ -126,6 +138,12 @@ public class GameManager : MonoBehaviour
         System.Array.Reverse(boardValues);
         if (allBoardsHaveValue && boardValues[boardValues.Length - 1] < boardValues[boardValues.Length - 2])
         {
+            // Find in the difference in scores
+            foreach (PlayerEntry player in players)
+            {
+                player.oldScore = player.score;
+            }
+
             int deletedBoardIndex = -1;
             for (int i = boards.Count - 1; i > - 1; i--)
             {
@@ -141,7 +159,6 @@ public class GameManager : MonoBehaviour
             // Reset the remaining boards
             for (int i = 0; i < boards.Count; i++)
             {
-                
                 boards[i].value = 0;
             }
 
@@ -167,6 +184,8 @@ public class GameManager : MonoBehaviour
                     }
                 }
             }
+
+            StartCoroutine(AIReact());
         }
 
         // Go to the next turn
@@ -255,6 +274,38 @@ public class GameManager : MonoBehaviour
         else
         {
             Debug.LogWarning("Trying to deal cards to player " + playerIndex + ", who is not active.");
+        }
+    }
+
+    IEnumerator AIReact()
+    {
+        yield return new WaitForSeconds(0.1f);
+        // AI react to scores changing
+        for (int i = 1; i < players.Length; i++)
+        {
+            if (!players[i].gameObject.activeInHierarchy)
+            {
+                continue;
+            }
+
+            int previousTurn = turn - 1;
+            if (turn < 0)
+            {
+                previousTurn = 0;
+            }
+
+            if (i == previousTurn)
+            {
+                players[turn].React(0, Random.Range(0.0f, 1.0f));
+            }
+            else if (players[i].score < players[i].oldScore)
+            {
+                players[i].React(1, Random.Range(0.0f, 1.0f));
+            }
+            else if (players[i].score == players[i].oldScore)
+            {
+                //players[i].React(2, Random.Range(0.0f, 1.0f));
+            }
         }
     }
 }

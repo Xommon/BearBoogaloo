@@ -62,6 +62,10 @@ public class AI : MonoBehaviour
         Board backupTargetBoard = gameManager.boards.FirstOrDefault(board => board.boardNumber == backupBoard[0]);
         Board lowestTargetBoard = gameManager.boards.FirstOrDefault(board => board.boardNumber == lowestBoard[0]);
 
+        int initialBetCount = targetBoard != null ? targetBoard.bets.Count : 0;
+        int betLossCount = 0;
+        bool boardDeleted = false;
+
         // Skip betting if all boards are full
         if (gameManager.boards.All(board => board.bets.Count >= gameManager.maxBet))
         {
@@ -113,6 +117,10 @@ public class AI : MonoBehaviour
             else
             {
                 gameManager.boards.FirstOrDefault(board => board.boardNumber == strongestBoard[0]).value = strongestBoard[1];
+                if (strongestBoard[1] > 7 && UnityEngine.Random.Range(0,3) == 0)
+                {
+                    playerData.React(0, UnityEngine.Random.Range(0.0f, 1.0f));
+                }
                 playerData.hand.RemoveAt(strongestCardIndex);
             }
         }
@@ -120,6 +128,19 @@ public class AI : MonoBehaviour
         {
             gameManager.boards.FirstOrDefault(board => board.boardNumber == strongestBoard[0]).value = strongestBoard[1];
             playerData.hand.RemoveAt(strongestCardIndex);
+        }
+
+        // Check if any boards were deleted and trigger appropriate reaction
+        foreach (Board board in gameManager.boards.ToList())
+        {
+            if (!board.gameObject.activeSelf)
+            {
+                boardDeleted = true;
+                if (board.bets.Contains(playerIndex))
+                {
+                    betLossCount++;
+                }
+            }
         }
 
         // Draw a new card
