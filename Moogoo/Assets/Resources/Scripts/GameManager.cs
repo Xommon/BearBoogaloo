@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -24,8 +25,11 @@ public class GameManager : MonoBehaviour
 
     // Game settings
     public int maxBet;
-
+    public int round;
     public List<Board> boards = new List<Board>();
+    public int boardsEnabled;
+    public GameObject endGameWindow;
+    private bool boardsIncrease;
 
     // Game
     public bool bettingTime;
@@ -33,6 +37,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         startButton.gameObject.SetActive(true);
+        round = 3;
     }
 
     void Update()
@@ -41,6 +46,16 @@ public class GameManager : MonoBehaviour
         foreach (Card card in hand.cards)
         {
             card.button.interactable = (turn == 0 && hand.canPlayCard && !bettingTime);
+        }
+
+        // Count the amount of boards enabled
+        boardsEnabled = 0;
+        foreach (Board board in boards)
+        {
+            if (board.gameObject.activeInHierarchy)
+            {
+                boardsEnabled++;
+            }
         }
 
         // Update score
@@ -59,7 +74,7 @@ public class GameManager : MonoBehaviour
         // Remove disabled boards
         for (int i = boards.Count - 1; i > -1; i--)
         {
-            if (!boards[i].gameObject.activeInHierarchy)
+            if (!boards[i].gameObject.activeInHierarchy && !startButton.gameObject.activeInHierarchy)
             {
                 boards.RemoveAt(i);
             }
@@ -185,38 +200,52 @@ public class GameManager : MonoBehaviour
                 }
             }
 
-            StartCoroutine(AIReact());
-        }
+            // End the round
+            round--;
 
-        // Go to the next turn
-        if (turn == players.Count(obj => obj.gameObject.activeInHierarchy) - 1)
-        {
-            turn = 0;
-        }
-        else
-        {
-            turn++;
-        }
-
-        // Activate AI
-        if (turn > 0)
-        {
-            players[turn].ActivateAI();
-        }
-        else
-        {
-            // Start the player's turn
-            bool boardsFull = true;
-            foreach (Board board in boards)
+            if (round > 0)
             {
-                if (board.bets.Count < maxBet)
-                {
-                    boardsFull = false;
-                }
+                StartCoroutine(AIReact());
+            }
+        }
+
+        if (round > 0)
+        {
+            // Go to the next turn
+            if (turn == players.Count(obj => obj.gameObject.activeInHierarchy) - 1)
+            {
+                turn = 0;
+            }
+            else
+            {
+                turn++;
             }
 
-            bettingTime = !boardsFull;
-            hand.canPlayCard = true;
+            // Activate AI
+            if (turn > 0)
+            {
+                players[turn].ActivateAI();
+            }
+            else
+            {
+                // Start the player's turn
+                bool boardsFull = true;
+                foreach (Board board in boards)
+                {
+                    if (board.bets.Count < maxBet)
+                    {
+                        boardsFull = false;
+                    }
+                }
+
+                bettingTime = !boardsFull;
+                hand.canPlayCard = true;
+            }
+        }
+        else
+        {
+            // End the game
+            endGameWindow.SetActive(true);
         }
     }
 
@@ -307,5 +336,41 @@ public class GameManager : MonoBehaviour
                 //players[i].React(2, Random.Range(0.0f, 1.0f));
             }
         }
+    }
+
+    public void ChangeMaxBet()
+    {
+        maxBet += 2;
+        if (maxBet == 8)
+        {
+            maxBet = 2;
+        }
+    }
+
+    public void ChangeBoardCount()
+    {
+        if (boardsIncrease && boardsEnabled < 6)
+        {
+            boards[boardsEnabled].gameObject.SetActive(true);
+        }
+        else if (boardsEnabled == 6)
+        {
+            boards[boardsEnabled - 1].gameObject.SetActive(false);
+            boardsIncrease = false;
+        }
+        else if (!boardsIncrease && boardsEnabled > 4)
+        {
+            boards[boardsEnabled - 1].gameObject.SetActive(false);
+        }
+        else if (boardsEnabled == 4)
+        {
+            boards[boardsEnabled - 1].gameObject.SetActive(true);
+            boardsIncrease = true;
+        }
+    }
+
+    public void RestartGame()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }
