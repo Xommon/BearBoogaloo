@@ -5,10 +5,10 @@ using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
-    public Color[] colours;
     public List<string> deck = new List<string>();
 
     // Players
@@ -22,6 +22,12 @@ public class GameManager : MonoBehaviour
     public Sprite[] icons;
     public Sprite[] reactionImages;
     public AnimationClip[] reactionAnimations;
+    public Sprite[] cpuIcons;
+    public string[] cpuNames;
+
+    // Cards
+    public Sprite[] cardIcons;
+    public Color[] colours;
 
     // Game settings
     public int maxBet;
@@ -97,6 +103,21 @@ public class GameManager : MonoBehaviour
             if (!players[i].gameObject.activeInHierarchy)
             {
                 players[i].gameObject.SetActive(true);
+
+                // Find all active player names
+                var activeNames = players
+                    .Where(player => player.gameObject.activeInHierarchy)
+                    .Select(player => player.name)
+                    .ToHashSet();
+
+                // Randomly assign a unique name from playerNames
+                string randomName;
+                do
+                {
+                    randomName = cpuNames[Random.Range(0, cpuNames.Length)];
+                } while (activeNames.Contains(randomName));
+
+                players[i].name = randomName;
                 break;
             }
         }
@@ -254,11 +275,19 @@ public class GameManager : MonoBehaviour
         // Clear the old deck
         deck.Clear();
 
-        for (int i = 1; i < 10; i++)
+        for (int i = 0; i < 10; i++)
         {
-            for (int i2 = 0; i2 < boards.Count; i2++)
+            for (int i2 = 0; i2 < boards.Count(obj => obj.gameObject.activeInHierarchy); i2++)
             {
                 deck.Add(boards[i2].boardNumber.ToString() + ":" + i.ToString());
+            }
+
+            if (i == 0)
+            {
+                for (int i2 = 0; i2 < boards.Count(obj => obj.gameObject.activeInHierarchy); i2++)
+                {
+                    deck.Add(boards[i2].boardNumber.ToString() + ":" + i.ToString());
+                }
             }
         }
 
@@ -364,7 +393,7 @@ public class GameManager : MonoBehaviour
         }
         else if (boardsEnabled == 4)
         {
-            boards[boardsEnabled - 1].gameObject.SetActive(true);
+            boards[4].gameObject.SetActive(true);
             boardsIncrease = true;
         }
     }

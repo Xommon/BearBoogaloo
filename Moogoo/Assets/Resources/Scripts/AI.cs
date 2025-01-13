@@ -9,10 +9,19 @@ public class AI : MonoBehaviour
     public GameManager gameManager;
     public PlayerEntry playerData;
     private int playerIndex;
+    public MovingChip movingChip;
 
     void Start()
     {
         playerIndex = transform.GetSiblingIndex();
+    }
+
+    void Update()
+    {
+        if (movingChip == null)
+        {
+            movingChip = FindObjectOfType<MovingChip>();
+        }
     }
 
     public IEnumerator PlayTurn()
@@ -103,6 +112,9 @@ public class AI : MonoBehaviour
                     fallbackBoard.bets.Add(playerIndex);
                 }
             }
+
+            // Show the moving chip
+            movingChip.StartMoving(new Vector2(playerData.iconDisplay.GetComponent<RectTransform>().position.x, playerData.iconDisplay.GetComponent<RectTransform>().position.y), new Vector2(200, 0));
         }
 
         // Decide which card to play based on board conditions

@@ -9,12 +9,15 @@ using System.Linq;
 public class Card : MonoBehaviour
 {
     private GameManager gameManager;
-    public Image colourDisplay;
+    public Image trimDisplay;
+    public Image backgroundDisplay;
+    public Image iconDisplay;
     public TextMeshProUGUI valueDisplay;
     public int colour;
     public int value;
     public Button button;
     public Hand hand;
+    public Sprite[] numberIcons;
 
     void Update()
     {
@@ -30,8 +33,15 @@ public class Card : MonoBehaviour
 
         try
         {
-            colourDisplay.color = gameManager.colours[colour];
-            valueDisplay.text = value.ToString();
+            // Colour and Icon
+            Color mainColour = (colour > -1) ? gameManager.colours[colour] : Color.black;
+            trimDisplay.color = mainColour;
+            backgroundDisplay.color = new Color(mainColour.r + 0.65f, mainColour.g  + 0.65f, mainColour.b + 0.65f);
+            iconDisplay.sprite = gameManager.cardIcons[colour];
+            
+            // Value Display
+            valueDisplay.text = (value == 0) ? "?" : value.ToString();
+            valueDisplay.color = mainColour;
         }
         catch
         {
@@ -42,7 +52,7 @@ public class Card : MonoBehaviour
     public void PlayCard()
     {
         // Play card and discard it from hand
-        gameManager.boards.FirstOrDefault(board => board.boardNumber == colour).value = value;
+        gameManager.boards.FirstOrDefault(board => board.boardNumber == colour).value = (value == 0) ? Random.Range(1,10) : value;
         gameManager.players[0].hand.RemoveAt(transform.GetSiblingIndex());
 
         // Draw a new card
@@ -53,7 +63,7 @@ public class Card : MonoBehaviour
 
     IEnumerator WaitForTurn()
     {
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(1.0f);
         gameManager.NextTurn();
     }
 }

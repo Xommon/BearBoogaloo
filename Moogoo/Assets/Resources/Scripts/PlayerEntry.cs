@@ -137,4 +137,29 @@ public class PlayerEntry : MonoBehaviour
             }
         }
     }
+
+    void OnEnable()
+    {
+        if (transform.GetSiblingIndex() == 0)
+        {
+            return;
+        }
+
+        ChangeIcon();
+
+        // Find all active player names
+        var activeNames = gameManager.players
+                    .Where(player => player.gameObject.activeInHierarchy)
+                    .Select(player => player.name)
+                    .ToHashSet();
+
+        // Randomly assign a unique name from playerNames
+        string randomName;
+        do
+        {
+            randomName = gameManager.cpuNames[Random.Range(0, gameManager.cpuNames.Length)];
+        } while (activeNames.Contains(randomName));
+
+        name = randomName;
+    }
 }
