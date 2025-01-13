@@ -8,13 +8,19 @@ public class ScoreEntry : MonoBehaviour
     public Image iconDisplay;
     public TextMeshProUGUI nameDisplay;
     public TextMeshProUGUI scoreDisplay;
-    public Sprite icon;
+    public int icon;
     public string name;
     public int score;
+    private GameManager gameManager;
 
     void Update()
     {
-        iconDisplay.sprite = icon;
+        if (gameManager == null)
+        {
+            gameManager = FindObjectOfType<GameManager>();
+        }
+
+        iconDisplay.sprite = gameManager.icons[icon];
         nameDisplay.text = name;
         scoreDisplay.text = score.ToString();
     }

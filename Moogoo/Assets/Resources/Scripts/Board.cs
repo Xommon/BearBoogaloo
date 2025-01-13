@@ -8,14 +8,17 @@ using System.Linq;
 public class Board : MonoBehaviour
 {
     public TextMeshProUGUI valueText;
-    public Image image;
+    public Image imageMask;
     public Button button;
     public GameManager gameManager;
     public int value;
     public Image[] betMarkers;
+    public Image trim;
+    public Image iconImage;
     public List<int> bets = new List<int>();
     public int boardNumber;
     public GridLayoutGroup betsParent;
+    public Image dangerImage;
 
     void Update()
     {
@@ -42,7 +45,28 @@ public class Board : MonoBehaviour
         // Update button
         button.interactable = (gameManager.turn == 0 && gameManager.bettingTime && bets.Count < gameManager.maxBet);
 
-        image.color = gameManager.colours[transform.GetSiblingIndex()];
+        iconImage.sprite = gameManager.cardIcons[transform.GetSiblingIndex()];
+        imageMask.color = new Color(gameManager.colours[transform.GetSiblingIndex()].r + 0.7f, gameManager.colours[transform.GetSiblingIndex()].g + 0.7f, gameManager.colours[transform.GetSiblingIndex()].b + 0.7f);
+        valueText.color = gameManager.colours[boardNumber];
+
+        // Update trim colour
+        trim.color = Color.white;
+
+        // Update danger display
+        int lowestValue = 9;
+        int amountOfBoardsWithValue = 0;
+
+        foreach (Board board in gameManager.boards)
+        {
+            if (board.value > 0)
+            amountOfBoardsWithValue++;
+
+            if (board.value < lowestValue && board.value > 0)
+            {
+                lowestValue = board.value;
+            }
+        }
+        dangerImage.gameObject.SetActive(value == lowestValue && amountOfBoardsWithValue > 1);
 
         // Update bets UI
         for (int i = 0; i < betMarkers.Length; i++)

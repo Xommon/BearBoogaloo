@@ -266,7 +266,7 @@ public class GameManager : MonoBehaviour
         else
         {
             // End the game
-            endGameWindow.SetActive(true);
+            StartCoroutine(EndGame());
         }
     }
 
@@ -280,14 +280,6 @@ public class GameManager : MonoBehaviour
             for (int i2 = 0; i2 < boards.Count(obj => obj.gameObject.activeInHierarchy); i2++)
             {
                 deck.Add(boards[i2].boardNumber.ToString() + ":" + i.ToString());
-            }
-
-            if (i == 0)
-            {
-                for (int i2 = 0; i2 < boards.Count(obj => obj.gameObject.activeInHierarchy); i2++)
-                {
-                    deck.Add(boards[i2].boardNumber.ToString() + ":" + i.ToString());
-                }
             }
         }
 
@@ -396,6 +388,12 @@ public class GameManager : MonoBehaviour
             boards[4].gameObject.SetActive(true);
             boardsIncrease = true;
         }
+    }
+
+    IEnumerator EndGame()
+    {
+        yield return new WaitForSeconds(1.0f);
+        endGameWindow.SetActive(true);
     }
 
     public void RestartGame()

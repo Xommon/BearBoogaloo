@@ -27,7 +27,6 @@ public class AI : MonoBehaviour
     public IEnumerator PlayTurn()
     {
         // Analyse cards in hand
-        yield return new WaitForSeconds(1.5f);
         int[] strongestBoard = new int[] { 0, 0 };
         int[] backupBoard = new int[] { 0, 0 };
         int[] lowestBoard = new int[] { 0, int.MaxValue };
@@ -76,13 +75,10 @@ public class AI : MonoBehaviour
         bool boardDeleted = false;
 
         // Skip betting if all boards are full
-        if (gameManager.boards.All(board => board.bets.Count >= gameManager.maxBet))
-        {
-            yield return new WaitForSeconds(1.5f);
-        }
-        else
+        if (!gameManager.boards.All(board => board.bets.Count >= gameManager.maxBet))
         {
             // Choose where to place the bet strategically
+            yield return new WaitForSeconds(1.0f);
             int betIndex = strongestBoard[0];
 
             if (targetBoard != null && backupTargetBoard != null)
@@ -118,7 +114,7 @@ public class AI : MonoBehaviour
         }
 
         // Decide which card to play based on board conditions
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(1.0f);
         if (backupTargetBoard != null && targetBoard != null)
         {
             if (targetBoard.value - backupTargetBoard.value <= 3)
@@ -159,7 +155,7 @@ public class AI : MonoBehaviour
         gameManager.DealCards(1, playerIndex);
 
         // End turn
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(1.0f);
         gameManager.NextTurn();
     }
 }

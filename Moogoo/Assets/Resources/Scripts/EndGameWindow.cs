@@ -9,38 +9,28 @@ public class EndGameWindow : MonoBehaviour
 {
     public GameManager gameManager;
     public ScoreEntry[] scoreEntries;
-    public Dictionary<string, int> scores = new Dictionary<string, int>();
-
-    void Update()
+    //public Dictionary<string, int> scores = new Dictionary<string, int>();
+    
+    void OnEnable()
     {
         for (int i = 0; i < scoreEntries.Length; i++)
         {
             scoreEntries[i].gameObject.SetActive(gameManager.players[i].gameObject.activeInHierarchy);
-        }
-    }
-    
-    void OnEnable()
-    {
-        scores.Clear();
 
-        // Scores from players
-        foreach (PlayerEntry player in gameManager.players)
-        {
-            scores.Add(player.name, player.score);
+            if (scoreEntries[i].gameObject.activeInHierarchy)
+            {
+                scoreEntries[i].name = gameManager.players[i].name;
+                scoreEntries[i].score = gameManager.players[i].score;
+                scoreEntries[i].icon = gameManager.players[i].iconIndex;
+            }
         }
 
-        // Order 
-        scores = scores.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
+        // Sort and rearrange the ScoreEntries by score (highest to lowest)
+        var sortedEntries = scoreEntries.OrderByDescending(entry => entry.score).ToList();
 
-        // Extract keys
-        List<string> keys = scores.Keys.ToList();
-
-        // Display scores
-        for (int i = 0; i < scores.Count; i++)
+        for (int i = 0; i < sortedEntries.Count; i++)
         {
-            scoreEntries[i].name = keys[i];
-            scoreEntries[i].score = scores[keys[i]];
-            scoreEntries[i].icon = gameManager.icons[gameManager.players[i].iconIndex];
+            sortedEntries[i].transform.SetSiblingIndex(i);
         }
     }
 }
