@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VectorGraphics;
 
 [ExecuteAlways]
 public class Board : MonoBehaviour
@@ -14,7 +15,7 @@ public class Board : MonoBehaviour
     public int value;
     public Image[] betMarkers;
     public Image trim;
-    public Image iconImage;
+    public Unity.VectorGraphics.SVGImage iconImage;
     public List<int> bets = new List<int>();
     public int boardNumber;
     public GridLayoutGroup betsParent;
@@ -22,32 +23,26 @@ public class Board : MonoBehaviour
 
     void Update()
     {
-        if (gameManager == null)
-        {
-            gameManager = FindObjectOfType<GameManager>();
-        }
+        // References
+        gameManager = (gameManager == null) ? FindObjectOfType<GameManager>() : gameManager;
+        betsParent = (betsParent == null) ? GetComponentInChildren<GridLayoutGroup>() : betsParent;
+        //svgRenderer = (svgRenderer == null) ? GetComponent<SVGRenderer>() : svgRenderer;
 
-        if (betsParent == null)
-        {
-            betsParent = GetComponentInChildren<GridLayoutGroup>();
-        }
-
-        // Update UI
-        if (value > 0)
-        {
-            valueText.text = value.ToString();
-        }
-        else
-        {
-            valueText.text = "";
-        }
+        // Change value of board
+        valueText.text = (value > 0) ? value.ToString() : "";
+        valueText.color = gameManager.colours[boardNumber];
 
         // Update button
         button.interactable = (gameManager.turn == 0 && gameManager.bettingTime && bets.Count < gameManager.maxBet);
 
+        // Update icon
+        SceneNode rootNode = VectorUtils.ParseSVGString(iconImage.text, VectorUtils.Alignment.Center, Vector2.zero, 1.0f);
+        //Debug.Log($"{boardNumber}: {rootNode.Shapes.Count}");
+        Debug.Log(iconImage.SceneNode.Shapes.Count);
         iconImage.sprite = gameManager.cardIcons[transform.GetSiblingIndex()];
         imageMask.color = new Color(gameManager.colours[transform.GetSiblingIndex()].r + 0.7f, gameManager.colours[transform.GetSiblingIndex()].g + 0.7f, gameManager.colours[transform.GetSiblingIndex()].b + 0.7f);
-        valueText.color = gameManager.colours[boardNumber];
+        
+        //sceneNode.Shapes[0].Fill = new SolidFill(Color.black);
 
         // Update trim colour
         trim.color = Color.white;
@@ -59,7 +54,7 @@ public class Board : MonoBehaviour
         foreach (Board board in gameManager.boards)
         {
             if (board.value > 0)
-            amountOfBoardsWithValue++;
+                amountOfBoardsWithValue++;
 
             if (board.value < lowestValue && board.value > 0)
             {
