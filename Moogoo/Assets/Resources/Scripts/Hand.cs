@@ -16,6 +16,11 @@ public class Hand : MonoBehaviour
             gameManager = FindObjectOfType<GameManager>();
         }
 
+        if (mainPlayer.hand.Count < 1)
+        {
+            return;
+        }
+
         // Show the cards that are in the hand
         for (int i = 0; i < mainPlayer.hand.Count; i++)
         {

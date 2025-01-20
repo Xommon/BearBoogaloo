@@ -31,14 +31,7 @@ public class PlayerEntry : MonoBehaviour
         scoreDisplay.text = score.ToString();
 
         // Highlight when it's the player's turn
-        if (gameManager.turn == transform.GetSiblingIndex())
-        {
-            background.color = new Color(background.color.r, background.color.g, background.color.b, 0.75f);
-        }
-        else
-        {
-            background.color = new Color(background.color.r, background.color.g, background.color.b, 0.25f);
-        }
+        background.color = (gameManager.turn == transform.GetSiblingIndex()) ? new Color(1.0f, 0.88f, 0.0f, 1.0f) : background.color = new Color(0.53f, 0.65f, 0.72f, 0.75f);
         
         iconDisplay.sprite = gameManager.icons[iconIndex];
         iconDisplay.color = Color.white;

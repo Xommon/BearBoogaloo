@@ -4,6 +4,8 @@ using TMPro;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VectorGraphics;
+using System.IO;
 
 [ExecuteAlways]
 public class Card : MonoBehaviour
@@ -11,7 +13,7 @@ public class Card : MonoBehaviour
     private GameManager gameManager;
     public Image trimDisplay;
     public Image backgroundDisplay;
-    public Image iconDisplay;
+    public SVGImage iconDisplay;
     public TextMeshProUGUI valueDisplay;
     public int colour;
     public int value;
@@ -21,27 +23,32 @@ public class Card : MonoBehaviour
 
     void Update()
     {
-        if (gameManager == null)
-        {
-            gameManager = FindObjectOfType<GameManager>();
-        }
-
-        if (hand == null)
-        {
-            hand = FindObjectOfType<Hand>();
-        }
+        // References
+        gameManager = (gameManager == null) ? FindObjectOfType<GameManager>() : gameManager;
+        hand = (hand == null) ? FindObjectOfType<Hand>() : hand;
 
         try
         {
-            // Colour and Icon
+            // Main colour
             Color mainColour = (colour > -1) ? gameManager.colours[colour] : Color.black;
-            trimDisplay.color = mainColour;
-            backgroundDisplay.color = new Color(mainColour.r + 0.65f, mainColour.g  + 0.65f, mainColour.b + 0.65f);
-            iconDisplay.sprite = gameManager.cardIcons[colour];
             
-            // Value Display
+            // Trim
+            trimDisplay.color = mainColour;
+
+            // Background
+            backgroundDisplay.color = new Color(mainColour.r + 0.55f, mainColour.g  + 0.55f, mainColour.b + 0.55f);
+
+            // SVG Image
+            iconDisplay.sprite = gameManager.cardIcons[colour];
+
+            // SVG TESTING
+            //Scene scene = SVGParser.ImportSVG(new System.IO.StringReader(svgFile.text)).Scene;
+            //Scene scene = VectorUtils.BuildScene(svgImage.sprite, 1.0f);
+            //TraverseSceneNode(scene.Root, 0);
+            
+            // Value display
             valueDisplay.text = (value == 0) ? "?" : value.ToString();
-            valueDisplay.color = mainColour;
+            valueDisplay.color = new Color(mainColour.r + 0.15f, mainColour.g  + 0.15f, mainColour.b + 0.15f);
         }
         catch
         {

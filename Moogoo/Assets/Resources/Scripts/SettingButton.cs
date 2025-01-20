@@ -31,7 +31,7 @@ public class SettingButton : MonoBehaviour
                     boardsCount++;
                 }
             }
-            textDisplay.text = $"Boards\n<size=58>{boardsCount}";
+            textDisplay.text = $"Boards\n<size=48>{boardsCount}";
         }
 
         if (!gameManager.startButton.gameObject.activeInHierarchy && Application.isPlaying)

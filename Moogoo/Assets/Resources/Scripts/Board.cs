@@ -36,9 +36,9 @@ public class Board : MonoBehaviour
         button.interactable = (gameManager.turn == 0 && gameManager.bettingTime && bets.Count < gameManager.maxBet);
 
         // Update icon
-        SceneNode rootNode = VectorUtils.ParseSVGString(iconImage.text, VectorUtils.Alignment.Center, Vector2.zero, 1.0f);
+        //SceneNode rootNode = VectorUtils.ParseSVGString(iconImage.text, VectorUtils.Alignment.Center, Vector2.zero, 1.0f);
         //Debug.Log($"{boardNumber}: {rootNode.Shapes.Count}");
-        Debug.Log(iconImage.SceneNode.Shapes.Count);
+        //Debug.Log(iconImage.SceneNode.Shapes.Count);
         iconImage.sprite = gameManager.cardIcons[transform.GetSiblingIndex()];
         imageMask.color = new Color(gameManager.colours[transform.GetSiblingIndex()].r + 0.7f, gameManager.colours[transform.GetSiblingIndex()].g + 0.7f, gameManager.colours[transform.GetSiblingIndex()].b + 0.7f);
         

@@ -36,6 +36,8 @@ public class GameManager : MonoBehaviour
     public int boardsEnabled;
     public GameObject endGameWindow;
     private bool boardsIncrease;
+    public Animator boardsAnimator;
+    public Animator playersAnimator;
 
     // Game
     public bool bettingTime;
@@ -44,6 +46,9 @@ public class GameManager : MonoBehaviour
     {
         startButton.gameObject.SetActive(true);
         round = 3;
+
+        playersAnimator.enabled = false;
+        boardsAnimator.enabled = false;
     }
 
     void Update()
@@ -137,13 +142,44 @@ public class GameManager : MonoBehaviour
 
     public void StartButton()
     {
+        // Close menu buttons
         addButton.SetActive(false);
         deleteButton.SetActive(false);
         startButton.gameObject.SetActive(false);
+
+        // Disable icon buttons that change player colour
+        foreach (PlayerEntry player in players)
+        {
+            player.iconDisplay.GetComponent<Button>().enabled = false;
+        }
+
+        // Move the game windows
+        playersAnimator.enabled = true;
+        boardsAnimator.enabled = true;
+    }
+
+    public void SetupGame()
+    {
+        // Create a new deck and start dealing cards
         NewDeck();
-        DealCards(5);
-        turn = Random.Range(0, players.Count(obj => obj.gameObject.activeInHierarchy));
-        NextTurn();
+        StartCoroutine(InitialCards());
+    }
+
+    IEnumerator InitialCards()
+    {
+        yield return new WaitForSeconds(0.25f);
+        DealCards(1);
+
+        if (players[0].hand.Count < 5)
+        {
+            StartCoroutine(InitialCards());
+        }
+        else
+        {
+            yield return new WaitForSeconds(0.5f);
+            turn = Random.Range(0, players.Count(obj => obj.gameObject.activeInHierarchy));
+            NextTurn();
+        }
     }
 
     public void NextTurn()

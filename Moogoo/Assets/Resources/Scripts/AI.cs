@@ -7,6 +7,7 @@ using System;
 public class AI : MonoBehaviour
 {
     public GameManager gameManager;
+    [HideInInspector]
     public PlayerEntry playerData;
     private int playerIndex;
     public MovingChip movingChip;
@@ -14,14 +15,12 @@ public class AI : MonoBehaviour
     void Start()
     {
         playerIndex = transform.GetSiblingIndex();
+        playerData = GetComponent<PlayerEntry>();
     }
 
     void Update()
     {
-        if (movingChip == null)
-        {
-            movingChip = FindObjectOfType<MovingChip>();
-        }
+        movingChip = (movingChip == null) ? FindObjectOfType<MovingChip>() : movingChip;
     }
 
     public IEnumerator PlayTurn()
