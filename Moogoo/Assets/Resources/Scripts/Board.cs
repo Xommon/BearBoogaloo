@@ -20,17 +20,25 @@ public class Board : MonoBehaviour
     public int boardNumber;
     public GridLayoutGroup betsParent;
     public Image dangerImage;
+    private Animator animator;
+    private int oldValue;
 
     void Update()
     {
         // References
         gameManager = (gameManager == null) ? FindObjectOfType<GameManager>() : gameManager;
         betsParent = (betsParent == null) ? GetComponentInChildren<GridLayoutGroup>() : betsParent;
+        animator = (animator == null) ? GetComponentInChildren<Animator>() : animator;
         //svgRenderer = (svgRenderer == null) ? GetComponent<SVGRenderer>() : svgRenderer;
 
         // Change value of board
         valueText.text = (value > 0) ? value.ToString() : "";
         valueText.color = gameManager.colours[boardNumber];
+        if (value != oldValue)
+        {
+            animator.Play("boards_number_jump", -1, 0f);
+            oldValue = value;
+        }
 
         // Update button
         button.interactable = (gameManager.turn == 0 && gameManager.bettingTime && bets.Count < gameManager.maxBet);

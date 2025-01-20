@@ -30,6 +30,7 @@ public class CPUDisplay : MonoBehaviour
             cpuNameDisplay.text = gameManager.players[gameManager.turn].name;
             //cpuColourDisplay.color = gameManager.colours[gameManager.turn];
             cpuColourDisplay.color = gameManager.colours[gameManager.players[gameManager.turn].iconIndex];
+            cpuNameDisplay.color = (cpuColourDisplay.color == gameManager.colours[2] || cpuColourDisplay.color == gameManager.colours[9]) ? Color.black : Color.white;
         }
     }
 }

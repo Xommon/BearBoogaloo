@@ -237,7 +237,7 @@ public class GameManager : MonoBehaviour
             // Remove all the cards that belonged to the deleted board
             for (int i = deck.Count - 1; i > -1; i--)
             {
-                if (int.Parse(deck[i][0].ToString()) == deletedBoardIndex)
+                if (int.Parse(deck[i].Split(":")[0].ToString()) == deletedBoardIndex)
                 {
                     deck.RemoveAt(i);
                 }
@@ -249,7 +249,7 @@ public class GameManager : MonoBehaviour
                 for (int i2 = players[i].hand.Count - 1; i2 > -1; i2--)
                 {
                     // Replace the card if its board has been deleted
-                    if (int.Parse(players[i].hand[i2][0].ToString()) == deletedBoardIndex)
+                    if (int.Parse(players[i].hand[i2].Split(":")[0].ToString()) == deletedBoardIndex)
                     {
                         players[i].hand.Remove(players[i].hand[i2]);
                         DealCards(1, i);
@@ -311,12 +311,19 @@ public class GameManager : MonoBehaviour
         // Clear the old deck
         deck.Clear();
 
+        // Build a new deck
         for (int i = 0; i < 10; i++)
         {
             for (int i2 = 0; i2 < boards.Count(obj => obj.gameObject.activeInHierarchy); i2++)
             {
                 deck.Add(boards[i2].boardNumber.ToString() + ":" + i.ToString());
             }
+        }
+
+        // Randomise current values
+        for (int i = 0; i < 4; i++)
+        {
+            deck.Add("-1:0");
         }
 
         // Shuffle deck
