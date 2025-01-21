@@ -58,6 +58,12 @@ public class Card : MonoBehaviour
             valueDisplay.text = "<size=16>Randomise Existing Values";
             valueDisplay.alignment = TextAlignmentOptions.Center;
         }
+        else if (colour == -2)
+        {
+            // Fill empty boards card
+            valueDisplay.text = $"<size=16>Set Empty Boards' Values to {value}";
+            valueDisplay.alignment = TextAlignmentOptions.Center;
+        }
         else if (value == 0)
         {
             valueDisplay.text = "?";
@@ -78,6 +84,9 @@ public class Card : MonoBehaviour
 
     public void PlayCard()
     {
+        // Play sound
+        AudioManager.Play("card1", "card2");
+
         // Play card
         if (colour > - 1)
         {
@@ -101,9 +110,21 @@ public class Card : MonoBehaviour
                 }
             }
         }
+        else if (colour == -2)
+        {
+            // Fill empty boards
+            foreach (Board board in gameManager.boards)
+            {
+                if (board.gameObject.activeInHierarchy && board.value == 0)
+                {
+                    board.value = value;
+                }
+            }
+        }
 
         // Discard it from hand
         gameManager.players[0].hand.RemoveAt(transform.GetSiblingIndex());
+        gameManager.discardPile.Add($"{colour}:{value}");
 
         // Draw a new card
         gameManager.DealCards(1, 0);

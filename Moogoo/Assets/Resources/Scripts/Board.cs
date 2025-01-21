@@ -22,6 +22,7 @@ public class Board : MonoBehaviour
     public Image dangerImage;
     private Animator animator;
     private int oldValue;
+    public Texture2D cross;
 
     void Update()
     {
@@ -111,7 +112,16 @@ public class Board : MonoBehaviour
 
     public void PlaceBet()
     {
+        // Play sound
+        AudioManager.Play("chip0", "chip1", "chip2");
+
         gameManager.boards.FirstOrDefault(board => board.boardNumber == transform.GetSiblingIndex()).bets.Add(0);
         gameManager.bettingTime = false;
+    }
+
+    public void DeleteBoard()
+    {
+        animator.Play("boards_delete", -1, 0f);
+        AudioManager.Play("lose");
     }
 }

@@ -30,7 +30,12 @@ public class AI : MonoBehaviour
         if (!gameManager.boards.All(board => board.bets.Count >= gameManager.maxBet))
         {
             yield return new WaitForSeconds(1.0f);
-            while (!gameManager.boards[selection].gameObject.activeInHierarchy)
+
+            // Play sound
+            AudioManager.Play("chip0", "chip1", "chip2");
+
+            // Place chip
+            while (!gameManager.boards[selection].gameObject.activeInHierarchy || gameManager.boards[selection].bets.Count >= gameManager.maxBet)
             {
                 selection = UnityEngine.Random.Range(0, gameManager.boards.Count);
             }
@@ -42,7 +47,10 @@ public class AI : MonoBehaviour
         selection = 0;
         string[] cardContent = playerData.hand[selection].Split(":");
 
-        if (int.Parse(cardContent[0]) > 0)
+        // Play sound
+        AudioManager.Play("card1", "card2");
+
+        if (int.Parse(cardContent[0]) > -1)
         {
             Board selectedBoard = gameManager.boards.FirstOrDefault(board => board.boardNumber == int.Parse(cardContent[0]));
             while (!selectedBoard.gameObject.activeInHierarchy)
@@ -51,7 +59,7 @@ public class AI : MonoBehaviour
             }
 
             // Play the card
-            selectedBoard.value = int.Parse(cardContent[1]);
+            selectedBoard.value = (int.Parse(cardContent[1]) == 0) ? UnityEngine.Random.Range(1, 10) : int.Parse(cardContent[1]);
         }
         else if (int.Parse(cardContent[0]) == -1)
         {
@@ -70,9 +78,21 @@ public class AI : MonoBehaviour
                 }
             }
         }
+        else if (int.Parse(cardContent[0]) == -2)
+        {
+            // Fill empty boards
+            foreach (Board board in gameManager.boards)
+            {
+                if (board.gameObject.activeInHierarchy && board.value == 0)
+                {
+                    board.value = int.Parse(cardContent[1]);
+                }
+            }
+        }
 
         // Discard the card
         playerData.hand.RemoveAt(selection);
+        gameManager.discardPile.Add($"{cardContent[0]}:{cardContent[1]}");
 
         // Draw a new card
         gameManager.DealCards(1, playerIndex);

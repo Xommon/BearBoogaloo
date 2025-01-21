@@ -41,6 +41,7 @@ public class GameManager : MonoBehaviour
 
     // Game
     public bool bettingTime;
+    public List<string> discardPile;
 
     void Start()
     {
@@ -103,6 +104,9 @@ public class GameManager : MonoBehaviour
 
     public void AddPlayer()
     {
+        // Play sound
+        AudioManager.Play("UI0");
+
         for (int i = 0; i < players.Length; i++)
         {
             if (!players[i].gameObject.activeInHierarchy)
@@ -130,6 +134,9 @@ public class GameManager : MonoBehaviour
 
     public void DeletePlayer()
     {
+        // Play sound
+        AudioManager.Play("UI0");
+
         for (int i = players.Length - 1; i > 0; i--)
         {
             if (players[i].gameObject.activeInHierarchy)
@@ -142,6 +149,9 @@ public class GameManager : MonoBehaviour
 
     public void StartButton()
     {
+        // Play sound
+        AudioManager.Play("UI0");
+
         // Close menu buttons
         addButton.SetActive(false);
         deleteButton.SetActive(false);
@@ -184,6 +194,11 @@ public class GameManager : MonoBehaviour
 
     public void NextTurn()
     {
+        StartCoroutine(StartNextTurn());
+    }
+
+    IEnumerator StartNextTurn()
+    {
         // Check for win/lose conditions
         bool allBoardsHaveValue = true;
         int[] boardValues = new int[boards.Count];
@@ -223,6 +238,8 @@ public class GameManager : MonoBehaviour
                 {
                     // Remove the lowest board
                     deletedBoardIndex = boards[i].boardNumber;
+                    boards[i].DeleteBoard();
+                    yield return new WaitForSeconds(1.5f);
                     boards[i].gameObject.SetActive(false);
                     boards.RemoveAt(i);
                 }
@@ -320,10 +337,14 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        // Randomise current values
-        for (int i = 0; i < 4; i++)
+        // Special Cards
+        for (int i = 0; i < 3; i++)
         {
+            // Randomise values
             deck.Add("-1:0");
+
+            // Set current values to #
+            deck.Add($"-2:{UnityEngine.Random.Range(1, 10)}");
         }
 
         // Shuffle deck
@@ -332,6 +353,9 @@ public class GameManager : MonoBehaviour
 
     public void DealCards(int amount)
     {
+        // Play sound
+        AudioManager.Play("card1", "card2");
+
         // Create a new deck if the previous cards run out
         if (deck.Count <= 0)
         {
@@ -353,6 +377,9 @@ public class GameManager : MonoBehaviour
 
     public void DealCards(int amount, int playerIndex)
     {
+        // Play sound
+        AudioManager.Play("card1", "card2");
+
         // Create a new deck if the previous cards run out
         if (deck.Count <= 0)
         {
@@ -404,6 +431,9 @@ public class GameManager : MonoBehaviour
 
     public void ChangeMaxBet()
     {
+        // Play sound
+        AudioManager.Play("UI0");
+
         maxBet += 2;
         if (maxBet == 8)
         {
@@ -413,6 +443,9 @@ public class GameManager : MonoBehaviour
 
     public void ChangeBoardCount()
     {
+        // Play sound
+        AudioManager.Play("UI0");
+        
         if (boardsIncrease && boardsEnabled < 6)
         {
             boards[boardsEnabled].gameObject.SetActive(true);
