@@ -42,6 +42,7 @@ public class GameManager : MonoBehaviour
     // Game
     public bool bettingTime;
     public List<string> discardPile;
+    public bool betScore;
 
     void Start()
     {
@@ -71,15 +72,18 @@ public class GameManager : MonoBehaviour
         }
 
         // Update score
-        foreach (PlayerEntry player in players)
+        if (betScore)
         {
-            player.score = 0;
-        }
-        foreach (Board board in boards)
-        {
-            foreach (int bet in board.bets)
+            foreach (PlayerEntry player in players)
             {
-                players[bet].score++;
+                player.score = 0;
+            }
+            foreach (Board board in boards)
+            {
+                foreach (int bet in board.bets)
+                {
+                    players[bet].score++;
+                }
             }
         }
 
@@ -105,7 +109,7 @@ public class GameManager : MonoBehaviour
     public void AddPlayer()
     {
         // Play sound
-        AudioManager.Play("UI0");
+        AudioManager.Play("AddPlayer");
 
         for (int i = 0; i < players.Length; i++)
         {
@@ -135,7 +139,7 @@ public class GameManager : MonoBehaviour
     public void DeletePlayer()
     {
         // Play sound
-        AudioManager.Play("UI0");
+        AudioManager.Play("DeletePlayer");
 
         for (int i = players.Length - 1; i > 0; i--)
         {
@@ -236,10 +240,24 @@ public class GameManager : MonoBehaviour
             {
                 if (boards[i].value == boardValues[boardValues.Length - 1])
                 {
-                    // Remove the lowest board
+                    // Find the lowest board
                     deletedBoardIndex = boards[i].boardNumber;
+                    Board deletedBoard = boards.FirstOrDefault(board => board.boardNumber == deletedBoardIndex);
+
+                    // Award points to the player who deleted points
+                    int addedScore = 0;
+                    if (deletedBoard.bets.Count() > 0)
+                    {
+                        for (int i2 = 0; i2 < deletedBoard.bets.Count(); i2++)
+                        {
+                            addedScore += (deletedBoard.bets[i2] == turn) ? -1 : 1;
+                        }
+                    }
+
+                    // Remove the lowest board
                     boards[i].DeleteBoard();
                     yield return new WaitForSeconds(1.5f);
+                    players[turn].score += addedScore;
                     boards[i].gameObject.SetActive(false);
                     boards.RemoveAt(i);
                 }
@@ -432,7 +450,7 @@ public class GameManager : MonoBehaviour
     public void ChangeMaxBet()
     {
         // Play sound
-        AudioManager.Play("UI0");
+        AudioManager.Play("UI1");
 
         maxBet += 2;
         if (maxBet == 8)
@@ -444,8 +462,8 @@ public class GameManager : MonoBehaviour
     public void ChangeBoardCount()
     {
         // Play sound
-        AudioManager.Play("UI0");
-        
+        AudioManager.Play("UI1");
+
         if (boardsIncrease && boardsEnabled < 6)
         {
             boards[boardsEnabled].gameObject.SetActive(true);
@@ -464,6 +482,14 @@ public class GameManager : MonoBehaviour
             boards[4].gameObject.SetActive(true);
             boardsIncrease = true;
         }
+    }
+
+    public void ChangeMode()
+    {
+        // Play sound
+        AudioManager.Play("UI1");
+        
+        betScore = !betScore;
     }
 
     IEnumerator EndGame()

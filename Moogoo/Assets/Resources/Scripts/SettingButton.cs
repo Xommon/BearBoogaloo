@@ -7,7 +7,7 @@ public class SettingButton : MonoBehaviour
 {
     public TextMeshProUGUI textDisplay;
     private GameManager gameManager;
-    public bool betDisplay;
+    public int settingIndex;
 
     // Update is called once per frame
     void Update()
@@ -17,21 +17,25 @@ public class SettingButton : MonoBehaviour
             gameManager = FindObjectOfType<GameManager>();
         }
 
-        if (betDisplay)
+        switch (settingIndex)
         {
-            textDisplay.text = $"Max\nBet\n<size=58>{gameManager.maxBet}";
-        }
-        else
-        {
-            int boardsCount = 0;
-            foreach (Board board in gameManager.boards)
-            {
-                if (board.gameObject.activeInHierarchy)
+            case 0:
+                textDisplay.text = $"Max\nBet\n<size=48>{gameManager.maxBet}";
+                break;
+            case 1:
+                int boardsCount = 0;
+                foreach (Board board in gameManager.boards)
                 {
-                    boardsCount++;
+                    if (board.gameObject.activeInHierarchy)
+                    {
+                        boardsCount++;
+                    }
                 }
-            }
-            textDisplay.text = $"Boards\n<size=48>{boardsCount}";
+                textDisplay.text = $"Boards\n<size=48>{boardsCount}";
+                break;
+            case 2:
+                textDisplay.text = (gameManager.betScore) ? $"Bet Score\n<size=48>On" : $"Bet Score\n<size=48>Off";
+                break;
         }
 
         if (!gameManager.startButton.gameObject.activeInHierarchy && Application.isPlaying)

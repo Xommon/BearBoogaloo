@@ -115,6 +115,12 @@ public class Board : MonoBehaviour
         // Play sound
         AudioManager.Play("chip0", "chip1", "chip2");
 
+        // Increase score
+        if (!gameManager.betScore)
+        {
+            gameManager.players[0].score++;
+        }
+
         gameManager.boards.FirstOrDefault(board => board.boardNumber == transform.GetSiblingIndex()).bets.Add(0);
         gameManager.bettingTime = false;
     }

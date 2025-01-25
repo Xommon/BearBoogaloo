@@ -34,6 +34,12 @@ public class AI : MonoBehaviour
             // Play sound
             AudioManager.Play("chip0", "chip1", "chip2");
 
+            // Increase score
+            if (!gameManager.betScore)
+            {
+                playerData.score++;
+            }
+
             // Place chip
             while (!gameManager.boards[selection].gameObject.activeInHierarchy || gameManager.boards[selection].bets.Count >= gameManager.maxBet)
             {

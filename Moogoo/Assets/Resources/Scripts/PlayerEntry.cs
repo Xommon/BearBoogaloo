@@ -42,8 +42,15 @@ public class PlayerEntry : MonoBehaviour
         }
     }
 
-    public void ChangeIcon()
+    public void ChangeIcon(bool buttonClicked)
     {
+        // Play sound
+        if (buttonClicked)
+        {
+            AudioManager.Play("chip0", "chip1", "chip2");
+        }
+        
+
         // Set the initial value
         int newIconIndex = 0;
         if (iconIndex < gameManager.icons.Length - 1)
@@ -138,7 +145,7 @@ public class PlayerEntry : MonoBehaviour
             return;
         }
 
-        ChangeIcon();
+        ChangeIcon(false);
 
         // Find all active player names
         var activeNames = gameManager.players
