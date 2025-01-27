@@ -46,6 +46,7 @@ public class AI : MonoBehaviour
             // Place chip
             Board selectedBoard = availableBoards[UnityEngine.Random.Range(0, availableBoards.Count)];
             selectedBoard.bets.Add(playerIndex);
+            selectedBoard.betMarkers[selectedBoard.bets.Count - 1].GetComponent<Animator>().enabled = true;
         }
 
         // Play a card

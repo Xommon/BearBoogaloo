@@ -2,7 +2,8 @@ using UnityEngine;
 
 public class Bet : MonoBehaviour
 {
-    private Animator animator;
+    [HideInInspector]
+    public Animator animator;
 
     void Update()
     {

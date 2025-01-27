@@ -33,7 +33,6 @@ public class Board : MonoBehaviour
         gameManager = (gameManager == null) ? FindObjectOfType<GameManager>() : gameManager;
         betsParent = (betsParent == null) ? GetComponentInChildren<GridLayoutGroup>() : betsParent;
         animator = (animator == null) ? GetComponentInChildren<Animator>() : animator;
-        //svgRenderer = (svgRenderer == null) ? GetComponent<SVGRenderer>() : svgRenderer;
 
         // Update name
         gameObject.name = $"Board: {boardNumber}";
@@ -135,7 +134,10 @@ public class Board : MonoBehaviour
             gameManager.players[0].score++;
         }
 
-        gameManager.boards.FirstOrDefault(board => board.boardNumber == transform.GetSiblingIndex()).bets.Add(0);
+        // Place the bet
+        Board selectedBoard = gameManager.boards.FirstOrDefault(board => board.boardNumber == transform.GetSiblingIndex());
+        selectedBoard.bets.Add(0);
+        selectedBoard.betMarkers[selectedBoard.bets.Count - 1].GetComponent<Animator>().enabled = true;
         gameManager.bettingTime = false;
     }
 
