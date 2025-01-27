@@ -521,4 +521,12 @@ public class GameManager : MonoBehaviour
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
+
+    public List<PlayerEntry> GetTopPlayers()
+    {
+        // Sort the players by score in descending order and return them
+        return players
+            .OrderByDescending(player => player.score)
+            .ToList();
+    }
 }

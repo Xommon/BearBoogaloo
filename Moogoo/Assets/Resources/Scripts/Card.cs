@@ -39,7 +39,7 @@ public class Card : MonoBehaviour
         trimDisplay.color = Color.white;
 
         // Background
-        backgroundDisplay.color = new Color(mainColour.r + 0.15f, mainColour.g  + 0.15f, mainColour.b + 0.15f);
+        backgroundDisplay.color = new Color(mainColour.r + 0.35f, mainColour.g  + 0.35f, mainColour.b + 0.35f);
 
         // SVG Image
         iconDisplay.sprite = (colour > -1) ? gameManager.cardIcons[colour] : iconDisplay.sprite;
@@ -91,8 +91,6 @@ public class Card : MonoBehaviour
 
     public void PlayCard()
     {
-        
-
         // Play card
         if (colour > - 1 && value > -1)
         {
@@ -120,11 +118,13 @@ public class Card : MonoBehaviour
         else if (colour == -1) // Special cards
         {
             // Randomise current values
+            bool nothingChanged = true;
             foreach (Board board in gameManager.boards)
             {
                 if (board.gameObject.activeInHierarchy && board.value > 0 && !board.isLocked)
                 {
                     // Make sure the new value is different from the old value
+                    nothingChanged = false;
                     int oldValue = board.value;
 
                     while (board.value == oldValue)
@@ -133,20 +133,40 @@ public class Card : MonoBehaviour
                     }
                 }
             }
+
+            if (nothingChanged)
+            {
+                AudioManager.Play("discard");
+            }
+            else
+            {
+                AudioManager.Play("card1", "card2");
+            }
         }
         else if (colour == -2)
         {
             // Fill empty boards
+            bool nothingChanged = true;
             foreach (Board board in gameManager.boards)
             {
-                if (board.gameObject.activeInHierarchy && board.value == 0)
+                if (board.gameObject.activeInHierarchy && board.value == 0 && !board.isLocked)
                 {
+                    nothingChanged = false;
                     board.value = value;
                 }
             }
+
+            if (nothingChanged)
+            {
+                AudioManager.Play("discard");
+            }
+            else
+            {
+                AudioManager.Play("card1", "card2");
+            }
         }
 
-        // Discard it from hand
+        // Discard card from hand
         gameManager.players[0].hand.RemoveAt(transform.GetSiblingIndex());
         gameManager.discardPile.Add($"{colour}:{value}");
 

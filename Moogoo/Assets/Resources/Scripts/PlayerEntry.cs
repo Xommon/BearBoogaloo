@@ -4,6 +4,7 @@ using TMPro;
 using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
+using System;
 
 [ExecuteAlways]
 public class PlayerEntry : MonoBehaviour
@@ -17,6 +18,8 @@ public class PlayerEntry : MonoBehaviour
     public AI ai;
 
     public string name;
+    [HideInInspector]
+    public int playerIndex;
     public int iconIndex;
     public int score;
     [HideInInspector]
@@ -31,6 +34,15 @@ public class PlayerEntry : MonoBehaviour
         if (ai != null)
         {
             ChangeIcon(false);
+        }
+
+        playerIndex = (ai != null) ? ai.playerIndex : 0;
+
+        // Change personality
+        if (ai != null)
+        {
+            Array values = Enum.GetValues(typeof(AI.Personality));
+            ai.personality = (AI.Personality)values.GetValue(UnityEngine.Random.Range(0, values.Length));
         }
     }
 
@@ -108,7 +120,7 @@ public class PlayerEntry : MonoBehaviour
 
         if (index == 0)
         {
-            int imageIndex = Random.Range(0, 3);
+            int imageIndex = UnityEngine.Random.Range(0, 3);
             reaction.sprite = gameManager.reactionImages[imageIndex];
             if (imageIndex == 2)
             {
@@ -121,7 +133,7 @@ public class PlayerEntry : MonoBehaviour
         }
         else if (index == 1)
         {
-            int imageIndex = Random.Range(4, 7);
+            int imageIndex = UnityEngine.Random.Range(4, 7);
             reaction.sprite = gameManager.reactionImages[imageIndex];
             if (imageIndex == 6)
             {
@@ -134,7 +146,7 @@ public class PlayerEntry : MonoBehaviour
         }
         else if (index == 2)
         {
-            int imageIndex = Random.Range(7, 9);
+            int imageIndex = UnityEngine.Random.Range(7, 9);
             reaction.sprite = gameManager.reactionImages[imageIndex];
             if (imageIndex == 7)
             {
@@ -162,11 +174,11 @@ public class PlayerEntry : MonoBehaviour
                     .Select(player => player.name)
                     .ToHashSet();
 
-        // Randomly assign a unique name from playerNames
+        // UnityEngine.Randomly assign a unique name from playerNames
         string randomName;
         do
         {
-            randomName = gameManager.cpuNames[Random.Range(0, gameManager.cpuNames.Length)];
+            randomName = gameManager.cpuNames[UnityEngine.Random.Range(0, gameManager.cpuNames.Length)];
         } while (activeNames.Contains(randomName));
 
         name = randomName;

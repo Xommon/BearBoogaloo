@@ -608,6 +608,10 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4687053870454169455, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 50
+      objectReference: {fileID: 0}
     - target: {fileID: 4915571551298432177, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -3933,11 +3937,11 @@ PrefabInstance:
       objectReference: {fileID: 691624164}
     - target: {fileID: 5915092070203405969, guid: 2d19c4cd6dd6aefc09f09156181fe653, type: 3}
       propertyPath: name
-      value: Szymon
+      value: "A\u016Dgusteno"
       objectReference: {fileID: 0}
     - target: {fileID: 5915092070203405969, guid: 2d19c4cd6dd6aefc09f09156181fe653, type: 3}
       propertyPath: iconIndex
-      value: 3
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 5915092070203405969, guid: 2d19c4cd6dd6aefc09f09156181fe653, type: 3}
       propertyPath: gameManager
@@ -4098,7 +4102,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameManager: {fileID: 1573179415}
   playerData: {fileID: 691624154}
+  playerIndex: 0
   movingChip: {fileID: 2077304675}
+  personality: 2
 --- !u!1 &696348949
 GameObject:
   m_ObjectHideFlags: 0
@@ -4582,6 +4588,10 @@ PrefabInstance:
     - target: {fileID: 3599799252755773884, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_Color.r
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4687053870454169455, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 4915571551298432177, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_Pivot.x
@@ -5778,6 +5788,10 @@ PrefabInstance:
       propertyPath: m_Color.r
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4687053870454169455, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 50
+      objectReference: {fileID: 0}
     - target: {fileID: 4915571551298432177, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -6688,6 +6702,10 @@ PrefabInstance:
     - target: {fileID: 3599799252755773884, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_Color.r
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4687053870454169455, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 4915571551298432177, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_Pivot.x
@@ -8261,7 +8279,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameManager: {fileID: 1573179415}
   playerData: {fileID: 0}
+  playerIndex: 0
   movingChip: {fileID: 2077304675}
+  personality: 1
 --- !u!1 &1442887238
 GameObject:
   m_ObjectHideFlags: 0
@@ -8916,6 +8936,10 @@ PrefabInstance:
       propertyPath: m_Color.r
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4687053870454169455, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 50
+      objectReference: {fileID: 0}
     - target: {fileID: 4915571551298432177, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -9526,7 +9550,7 @@ MonoBehaviour:
   - {r: 1, g: 0.9342736, b: 0, a: 1}
   - {r: 0.17495918, g: 1, b: 0, a: 1}
   - {r: 0, g: 0.22655034, b: 1, a: 1}
-  - {r: 0.73393774, g: 0, b: 1, a: 1}
+  - {r: 0.42147446, g: 0, b: 1, a: 1}
   - {r: 1, g: 0, b: 0.9046192, a: 1}
   - {r: 0, g: 0.9668927, b: 1, a: 1}
   - {r: 0.515496, g: 0.3601416, b: 0.15890135, a: 1}
@@ -9992,11 +10016,11 @@ PrefabInstance:
       objectReference: {fileID: 1598964614}
     - target: {fileID: 5915092070203405969, guid: 2d19c4cd6dd6aefc09f09156181fe653, type: 3}
       propertyPath: name
-      value: Wanda
+      value: Ronan
       objectReference: {fileID: 0}
     - target: {fileID: 5915092070203405969, guid: 2d19c4cd6dd6aefc09f09156181fe653, type: 3}
       propertyPath: iconIndex
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 5915092070203405969, guid: 2d19c4cd6dd6aefc09f09156181fe653, type: 3}
       propertyPath: gameManager
@@ -10157,7 +10181,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameManager: {fileID: 1573179415}
   playerData: {fileID: 0}
+  playerIndex: 0
   movingChip: {fileID: 2077304675}
+  personality: 0
 --- !u!1 &1604681889
 GameObject:
   m_ObjectHideFlags: 0
@@ -10317,11 +10343,11 @@ PrefabInstance:
       objectReference: {fileID: 1620174492}
     - target: {fileID: 5915092070203405969, guid: 2d19c4cd6dd6aefc09f09156181fe653, type: 3}
       propertyPath: name
-      value: Yu-Jin
+      value: Sheri
       objectReference: {fileID: 0}
     - target: {fileID: 5915092070203405969, guid: 2d19c4cd6dd6aefc09f09156181fe653, type: 3}
       propertyPath: iconIndex
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5915092070203405969, guid: 2d19c4cd6dd6aefc09f09156181fe653, type: 3}
       propertyPath: gameManager
@@ -10482,7 +10508,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameManager: {fileID: 1573179415}
   playerData: {fileID: 0}
+  playerIndex: 0
   movingChip: {fileID: 2077304675}
+  personality: 2
 --- !u!1001 &1636309218
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10618,6 +10646,10 @@ PrefabInstance:
     - target: {fileID: 3599799252755773884, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_Color.r
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4687053870454169455, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 4915571551298432177, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_Pivot.x
@@ -11528,7 +11560,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameManager: {fileID: 1573179415}
   playerData: {fileID: 0}
+  playerIndex: 0
   movingChip: {fileID: 2077304675}
+  personality: 1
 --- !u!95 &1802940223
 Animator:
   serializedVersion: 7

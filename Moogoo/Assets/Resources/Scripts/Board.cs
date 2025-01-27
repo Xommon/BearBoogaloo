@@ -51,7 +51,7 @@ public class Board : MonoBehaviour
 
         // Update icon
         iconImage.sprite = gameManager.cardIcons[transform.GetSiblingIndex()];
-        imageMask.color = new Color(gameManager.colours[transform.GetSiblingIndex()].r + 0.7f, gameManager.colours[transform.GetSiblingIndex()].g + 0.7f, gameManager.colours[transform.GetSiblingIndex()].b + 0.7f);
+        imageMask.color = new Color(gameManager.colours[transform.GetSiblingIndex()].r + 0.35f, gameManager.colours[transform.GetSiblingIndex()].g + 0.35f, gameManager.colours[transform.GetSiblingIndex()].b + 0.35f);
 
         // Update trim colour
         trim.color = Color.white;
@@ -145,5 +145,19 @@ public class Board : MonoBehaviour
     {
         animator.Play("boards_delete", -1, 0f);
         AudioManager.Play("lose");
+    }
+
+    public int CountBets(int player)
+    {
+        int count = 0;
+        foreach (int bet in bets)
+        {
+            if (bet == player)
+            {
+                count++;
+            }
+        }
+
+        return count;
     }
 }
