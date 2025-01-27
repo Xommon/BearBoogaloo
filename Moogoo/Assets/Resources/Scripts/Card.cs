@@ -91,8 +91,7 @@ public class Card : MonoBehaviour
 
     public void PlayCard()
     {
-        // Play sound
-        AudioManager.Play("card1", "card2");
+        
 
         // Play card
         if (colour > - 1 && value > -1)
@@ -101,6 +100,14 @@ public class Card : MonoBehaviour
             if (!gameManager.boards.FirstOrDefault(board => board.boardNumber == colour).isLocked)
             {
                 gameManager.boards.FirstOrDefault(board => board.boardNumber == colour).value = (value == 0) ? Random.Range(1,10) : value;
+
+                // Play sound
+                AudioManager.Play("card1", "card2");
+            }
+            else
+            {
+                // Play sound
+                AudioManager.Play("discard");
             }
         }
         else if (colour > - 1 && value == -1)

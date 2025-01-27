@@ -39,7 +39,7 @@ public class Board : MonoBehaviour
 
         // Change value of board
         valueText.text = (value > 0) ? value.ToString() : "";
-        valueText.color = gameManager.colours[boardNumber];
+        valueText.color = Color.white;//gameManager.colours[boardNumber];
         if (value != oldValue)
         {
             animator.Play("boards_number_jump", -1, 0f);

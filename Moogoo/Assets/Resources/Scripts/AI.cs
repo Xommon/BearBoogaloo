@@ -54,25 +54,31 @@ public class AI : MonoBehaviour
         int selection = 0;
         string[] cardContent = playerData.hand[selection].Split(":");
 
-        // Play sound
-        AudioManager.Play("card1", "card2");
-
         if (int.Parse(cardContent[0]) > -1)
         {
-            Board selectedBoard = gameManager.boards.FirstOrDefault(board => board.boardNumber == int.Parse(cardContent[0]) && !board.isLocked);
+            // Get the selected board
+            Board selectedBoard = gameManager.boards.FirstOrDefault(board => board.boardNumber == int.Parse(cardContent[0]));
             while (selectedBoard == null || !selectedBoard.gameObject.activeInHierarchy)
             {
                 selection++;
                 if (selection >= playerData.hand.Count)
                     break; // Exit loop if no valid cards remain
                 cardContent = playerData.hand[selection].Split(":");
-                selectedBoard = gameManager.boards.FirstOrDefault(board => board.boardNumber == int.Parse(cardContent[0]) && !board.isLocked);
+                selectedBoard = gameManager.boards.FirstOrDefault(board => board.boardNumber == int.Parse(cardContent[0]));
             }
 
-            if (selectedBoard != null && int.Parse(cardContent[1]) > -1)
+            if (selectedBoard != null && int.Parse(cardContent[1]) > -1 && !selectedBoard.isLocked)
             {
+                // Play sound
+                AudioManager.Play("card1", "card2");
+
                 // Play the card
                 selectedBoard.value = (int.Parse(cardContent[1]) == 0) ? UnityEngine.Random.Range(1, 10) : int.Parse(cardContent[1]);
+            }
+            else if (selectedBoard != null && int.Parse(cardContent[1]) > -1 && selectedBoard.isLocked)
+            {
+                // Play sound
+                AudioManager.Play("discard");
             }
             else if (selectedBoard != null && int.Parse(cardContent[1]) == -1)
             {
