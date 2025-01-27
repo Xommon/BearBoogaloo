@@ -25,6 +25,15 @@ public class PlayerEntry : MonoBehaviour
     private Animator reactionAnimator;
     public List<string> hand = new List<string>();
 
+    void Start()
+    {
+        // Change chip colour at beginning of game
+        if (ai != null)
+        {
+            ChangeIcon(false);
+        }
+    }
+
     void Update()
     {
         nameDisplay.text = name;

@@ -22,7 +22,10 @@ public class Board : MonoBehaviour
     public Image dangerImage;
     private Animator animator;
     private int oldValue;
-    public Texture2D cross;
+    public RawImage cross;
+    public bool isLocked;
+    public GameObject lockObject;
+    public int turnToUnlock;
 
     void Update()
     {
@@ -31,6 +34,9 @@ public class Board : MonoBehaviour
         betsParent = (betsParent == null) ? GetComponentInChildren<GridLayoutGroup>() : betsParent;
         animator = (animator == null) ? GetComponentInChildren<Animator>() : animator;
         //svgRenderer = (svgRenderer == null) ? GetComponent<SVGRenderer>() : svgRenderer;
+
+        // Update name
+        gameObject.name = $"Board: {boardNumber}";
 
         // Change value of board
         valueText.text = (value > 0) ? value.ToString() : "";
@@ -42,19 +48,17 @@ public class Board : MonoBehaviour
         }
 
         // Update button
-        button.interactable = (gameManager.turn == 0 && gameManager.bettingTime && bets.Count < gameManager.maxBet);
+        button.interactable = (gameManager.turn == 0 && gameManager.bettingTime && bets.Count < gameManager.maxBet && !isLocked);
 
         // Update icon
-        //SceneNode rootNode = VectorUtils.ParseSVGString(iconImage.text, VectorUtils.Alignment.Center, Vector2.zero, 1.0f);
-        //Debug.Log($"{boardNumber}: {rootNode.Shapes.Count}");
-        //Debug.Log(iconImage.SceneNode.Shapes.Count);
         iconImage.sprite = gameManager.cardIcons[transform.GetSiblingIndex()];
         imageMask.color = new Color(gameManager.colours[transform.GetSiblingIndex()].r + 0.7f, gameManager.colours[transform.GetSiblingIndex()].g + 0.7f, gameManager.colours[transform.GetSiblingIndex()].b + 0.7f);
-        
-        //sceneNode.Shapes[0].Fill = new SolidFill(Color.black);
 
         // Update trim colour
         trim.color = Color.white;
+
+        // Cross colour
+        cross.color = new Color(gameManager.colours[boardNumber].r + 0.25f, gameManager.colours[boardNumber].g + 0.25f, gameManager.colours[boardNumber].b + 0.25f);
 
         // Update danger display
         int lowestValue = 9;
@@ -107,6 +111,16 @@ public class Board : MonoBehaviour
             betsParent.childAlignment = TextAnchor.MiddleCenter;
                 betsParent.constraintCount = 2;
                 break;
+        }
+
+        // Show lock when locked
+        lockObject.SetActive(isLocked);
+
+        // Unlock
+        if (gameManager.totalTurns == turnToUnlock)
+        {
+            turnToUnlock = -1;
+            isLocked = false;
         }
     }
 

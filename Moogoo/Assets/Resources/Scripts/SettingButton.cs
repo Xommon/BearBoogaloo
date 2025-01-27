@@ -20,7 +20,7 @@ public class SettingButton : MonoBehaviour
         switch (settingIndex)
         {
             case 0:
-                textDisplay.text = $"Max\nBet\n<size=48>{gameManager.maxBet}";
+                textDisplay.text = $"Max Bet\n<size=40>{gameManager.maxBet}";
                 break;
             case 1:
                 int boardsCount = 0;
@@ -31,10 +31,10 @@ public class SettingButton : MonoBehaviour
                         boardsCount++;
                     }
                 }
-                textDisplay.text = $"Boards\n<size=48>{boardsCount}";
+                textDisplay.text = $"Boards\n<size=40>{boardsCount}";
                 break;
             case 2:
-                textDisplay.text = (gameManager.betScore) ? $"Bet Score\n<size=48>On" : $"Bet Score\n<size=48>Off";
+                textDisplay.text = (gameManager.betScore) ? $"Score Type\n<size=40>1" : $"Score Type\n<size=40>2";
                 break;
         }
 

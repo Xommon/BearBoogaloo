@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 707d5dbfd6e3830f0a73b3a4e86cbf1d
+guid: 8f2912a9d42f5bb90a86bfd0111fc31a
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7944502702452990849
-    second: Corn_0
+      213: 1272720792528277931
+    second: shadow.png_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Corn_0
+      name: shadow.png_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 16
-        height: 16
+        x: 2
+        y: 2
+        width: 121
+        height: 146
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f7c982742e47fb190800000000000000
-      internalID: -7944502702452990849
+      spriteID: ba1d6e051dc99a110800000000000000
+      internalID: 1272720792528277931
       vertices: []
       indices: 
       edges: []
@@ -151,7 +151,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Corn_0: -7944502702452990849
+      shadow.png_0: 1272720792528277931
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

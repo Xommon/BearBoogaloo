@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviour
     public Button startButton;
     public PlayerEntry[] players;
     public int turn;
+    public int totalTurns;
     public Hand hand;
     public Sprite[] icons;
     public Sprite[] reactionImages;
@@ -43,18 +44,31 @@ public class GameManager : MonoBehaviour
     public bool bettingTime;
     public List<string> discardPile;
     public bool betScore;
+    public int activePlayers;
 
     void Start()
     {
         startButton.gameObject.SetActive(true);
         round = 3;
 
+        // Set game up
         playersAnimator.enabled = false;
         boardsAnimator.enabled = false;
     }
 
     void Update()
     {
+        // Update active players
+        int tempActivePlayers = 0;
+        foreach (PlayerEntry player in players)
+        {
+            if (player.gameObject.activeInHierarchy)
+            {
+                tempActivePlayers++;
+            }
+        }
+        activePlayers = tempActivePlayers;
+
         // Disable card buttons when it's not your turn
         foreach (Card card in hand.cards)
         {
@@ -267,6 +281,7 @@ public class GameManager : MonoBehaviour
             for (int i = 0; i < boards.Count; i++)
             {
                 boards[i].value = 0;
+                boards[i].isLocked = false;
             }
 
             // Remove all the cards that belonged to the deleted board
@@ -304,6 +319,7 @@ public class GameManager : MonoBehaviour
         if (round > 0)
         {
             // Go to the next turn
+            totalTurns++;
             if (turn == players.Count(obj => obj.gameObject.activeInHierarchy) - 1)
             {
                 turn = 0;
@@ -326,7 +342,10 @@ public class GameManager : MonoBehaviour
                 {
                     if (board.bets.Count < maxBet)
                     {
-                        boardsFull = false;
+                        if (!board.isLocked)
+                        {
+                            boardsFull = false;
+                        }
                     }
                 }
 
@@ -347,7 +366,7 @@ public class GameManager : MonoBehaviour
         deck.Clear();
 
         // Build a new deck
-        for (int i = 0; i < 10; i++)
+        for (int i = -1; i < 10; i++)
         {
             for (int i2 = 0; i2 < boards.Count(obj => obj.gameObject.activeInHierarchy); i2++)
             {

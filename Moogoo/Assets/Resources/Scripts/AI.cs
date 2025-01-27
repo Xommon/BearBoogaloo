@@ -26,8 +26,11 @@ public class AI : MonoBehaviour
     public IEnumerator PlayTurn()
     {
         // Place a bet if all boards are NOT full of bets
-        int selection = UnityEngine.Random.Range(0, gameManager.boards.Count);
-        if (!gameManager.boards.All(board => board.bets.Count >= gameManager.maxBet))
+        var availableBoards = gameManager.boards
+            .Where(board => !board.isLocked && board.bets.Count < gameManager.maxBet && board.gameObject.activeInHierarchy)
+            .ToList();
+
+        if (availableBoards.Any())
         {
             yield return new WaitForSeconds(1.0f);
 
@@ -41,16 +44,13 @@ public class AI : MonoBehaviour
             }
 
             // Place chip
-            while (!gameManager.boards[selection].gameObject.activeInHierarchy || gameManager.boards[selection].bets.Count >= gameManager.maxBet)
-            {
-                selection = UnityEngine.Random.Range(0, gameManager.boards.Count);
-            }
-            gameManager.boards[selection].bets.Add(playerIndex);
+            Board selectedBoard = availableBoards[UnityEngine.Random.Range(0, availableBoards.Count)];
+            selectedBoard.bets.Add(playerIndex);
         }
 
         // Play a card
         yield return new WaitForSeconds(1.0f);
-        selection = 0;
+        int selection = 0;
         string[] cardContent = playerData.hand[selection].Split(":");
 
         // Play sound
@@ -58,23 +58,35 @@ public class AI : MonoBehaviour
 
         if (int.Parse(cardContent[0]) > -1)
         {
-            Board selectedBoard = gameManager.boards.FirstOrDefault(board => board.boardNumber == int.Parse(cardContent[0]));
-            while (!selectedBoard.gameObject.activeInHierarchy)
+            Board selectedBoard = gameManager.boards.FirstOrDefault(board => board.boardNumber == int.Parse(cardContent[0]) && !board.isLocked);
+            while (selectedBoard == null || !selectedBoard.gameObject.activeInHierarchy)
             {
                 selection++;
+                if (selection >= playerData.hand.Count)
+                    break; // Exit loop if no valid cards remain
+                cardContent = playerData.hand[selection].Split(":");
+                selectedBoard = gameManager.boards.FirstOrDefault(board => board.boardNumber == int.Parse(cardContent[0]) && !board.isLocked);
             }
 
-            // Play the card
-            selectedBoard.value = (int.Parse(cardContent[1]) == 0) ? UnityEngine.Random.Range(1, 10) : int.Parse(cardContent[1]);
+            if (selectedBoard != null && int.Parse(cardContent[1]) > -1)
+            {
+                // Play the card
+                selectedBoard.value = (int.Parse(cardContent[1]) == 0) ? UnityEngine.Random.Range(1, 10) : int.Parse(cardContent[1]);
+            }
+            else if (selectedBoard != null && int.Parse(cardContent[1]) == -1)
+            {
+                // Lock the board
+                selectedBoard.isLocked = true;
+                selectedBoard.turnToUnlock = gameManager.totalTurns + gameManager.activePlayers;//(gameManager.turn - 1 == -1) ? gameManager.activePlayers - 1 : gameManager.turn - 1;
+            }
         }
         else if (int.Parse(cardContent[0]) == -1)
         {
-            // Randomise current values
+            // Randomize current values
             foreach (Board board in gameManager.boards)
             {
-                if (board.gameObject.activeInHierarchy && board.value > 0)
+                if (board.gameObject.activeInHierarchy && board.value > 0 && !board.isLocked)
                 {
-                    // Make sure the new value is different from the old value
                     int oldValue = board.value;
 
                     while (board.value == oldValue)
@@ -89,7 +101,7 @@ public class AI : MonoBehaviour
             // Fill empty boards
             foreach (Board board in gameManager.boards)
             {
-                if (board.gameObject.activeInHierarchy && board.value == 0)
+                if (board.gameObject.activeInHierarchy && board.value == 0 && !board.isLocked)
                 {
                     board.value = int.Parse(cardContent[1]);
                 }
@@ -107,175 +119,4 @@ public class AI : MonoBehaviour
         yield return new WaitForSeconds(1.0f);
         gameManager.NextTurn();
     }
-
-    /*public IEnumerator PlayTurn()
-    {
-        // Analyse cards in hand
-        int[] strongestBoard = new int[] { 0, 0 };
-        int[] backupBoard = new int[] { 0, 0 };
-        int[] lowestBoard = new int[] { 0, int.MaxValue };
-        int strongestCardIndex = -1;
-        int backupCardIndex = -1;
-        int lowestCardIndex = -1;
-        int specialCardIndex = -1; // Tracks the index of a special card
-
-        for (int i = 0; i < playerData.hand.Count; i++)
-        {
-            string[] cardValues = playerData.hand[i].Split(":");
-            int boardNumber = int.Parse(cardValues[0]);
-            int cardValue = int.Parse(cardValues[1]);
-
-            int[] currentBoard = new int[] { boardNumber, cardValue };
-
-            // Identify special cards (color value -1)
-            if (cardValue == -1)
-            {
-                specialCardIndex = i;
-                continue; // Skip evaluation for strongest/lowest cards
-            }
-
-            // Evaluate the strongest and backup cards
-            if (currentBoard[1] > strongestBoard[1])
-            {
-                backupBoard = strongestBoard;
-                strongestBoard = currentBoard;
-
-                backupCardIndex = strongestCardIndex;
-                strongestCardIndex = i;
-            }
-            else if (currentBoard[1] > backupBoard[1])
-            {
-                backupBoard = currentBoard;
-                backupCardIndex = i;
-            }
-
-            // Identify the lowest value card
-            if (currentBoard[1] < lowestBoard[1])
-            {
-                lowestBoard = currentBoard;
-                lowestCardIndex = i;
-            }
-        }
-
-        // Evaluate board state
-        Board targetBoard = gameManager.boards.FirstOrDefault(board => board.boardNumber == strongestBoard[0]);
-        Board backupTargetBoard = gameManager.boards.FirstOrDefault(board => board.boardNumber == backupBoard[0]);
-        Board lowestTargetBoard = gameManager.boards.FirstOrDefault(board => board.boardNumber == lowestBoard[0]);
-
-        int initialBetCount = targetBoard != null ? targetBoard.bets.Count : 0;
-        int betLossCount = 0;
-        bool boardDeleted = false;
-
-        // Decide whether to play a special card
-        if (specialCardIndex != -1 && UnityEngine.Random.Range(0, 4) == 0) // 25% chance to play the special card
-        {
-            // Randomize all boards except those with value 0
-            foreach (Board board in gameManager.boards)
-            {
-                if (board.value > 0)
-                {
-                    board.value = UnityEngine.Random.Range(1, 10); // Randomize values (example range: 1 to 10)
-                }
-            }
-
-            // Remove the special card from the hand
-            playerData.hand.RemoveAt(specialCardIndex);
-
-            // React to the special card play
-            playerData.React(1, UnityEngine.Random.Range(0.0f, 1.0f));
-
-            // End turn after playing the special card
-            yield return new WaitForSeconds(1.0f);
-            gameManager.NextTurn();
-            yield break;
-        }
-
-        // Skip betting if all boards are full
-        if (!gameManager.boards.All(board => board.bets.Count >= gameManager.maxBet))
-        {
-            // Choose where to place the bet strategically
-            yield return new WaitForSeconds(1.0f);
-            int betIndex = strongestBoard[0];
-
-            if (targetBoard != null && backupTargetBoard != null)
-            {
-                if (targetBoard.value > backupTargetBoard.value && targetBoard.value - backupTargetBoard.value <= 2)
-                {
-                    betIndex = backupBoard[0];
-                }
-            }
-
-            // Place low-value card on board with fewer bets, respecting maxBet limit
-            if (lowestTargetBoard != null && lowestTargetBoard.bets.Count < gameManager.maxBet)
-            {
-                betIndex = lowestBoard[0];
-            }
-
-            Board betBoard = gameManager.boards.FirstOrDefault(board => board.boardNumber == betIndex);
-            if (betBoard != null && betBoard.bets.Count < gameManager.maxBet)
-            {
-                betBoard.bets.Add(playerIndex);
-            }
-            else
-            {
-                Board fallbackBoard = gameManager.boards.FirstOrDefault(board => board.bets.Count < gameManager.maxBet);
-                if (fallbackBoard != null)
-                {
-                    fallbackBoard.bets.Add(playerIndex);
-                }
-            }
-
-            // Show the moving chip
-            movingChip.StartMoving(new Vector2(playerData.iconDisplay.GetComponent<RectTransform>().position.x, playerData.iconDisplay.GetComponent<RectTransform>().position.y), new Vector2(200, 0));
-        }
-
-        // Decide which card to play based on board conditions
-        yield return new WaitForSeconds(1.0f);
-        if (backupTargetBoard != null && targetBoard != null)
-        {
-            if (targetBoard.value - backupTargetBoard.value <= 3)
-            {
-                gameManager.boards.FirstOrDefault(board => board.boardNumber == backupBoard[0]).value = backupBoard[1];
-                try
-                {
-                    playerData.hand.RemoveAt(backupCardIndex);
-                }
-                catch { }
-            }
-            else
-            {
-                gameManager.boards.FirstOrDefault(board => board.boardNumber == strongestBoard[0]).value = strongestBoard[1];
-                if (strongestBoard[1] > 7 && UnityEngine.Random.Range(0, 3) == 0)
-                {
-                    playerData.React(0, UnityEngine.Random.Range(0.0f, 1.0f));
-                }
-                playerData.hand.RemoveAt(strongestCardIndex);
-            }
-        }
-        else
-        {
-            gameManager.boards.FirstOrDefault(board => board.boardNumber == strongestBoard[0]).value = strongestBoard[1];
-            playerData.hand.RemoveAt(strongestCardIndex);
-        }
-
-        // Check if any boards were deleted and trigger appropriate reaction
-        foreach (Board board in gameManager.boards.ToList())
-        {
-            if (!board.gameObject.activeSelf)
-            {
-                boardDeleted = true;
-                if (board.bets.Contains(playerIndex))
-                {
-                    betLossCount++;
-                }
-            }
-        }
-
-        // Draw a new card
-        gameManager.DealCards(1, playerIndex);
-
-        // End turn
-        yield return new WaitForSeconds(1.0f);
-        gameManager.NextTurn();
-    }*/
 }

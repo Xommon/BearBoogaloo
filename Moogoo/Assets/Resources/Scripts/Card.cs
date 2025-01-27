@@ -14,6 +14,7 @@ public class Card : MonoBehaviour
     public Image trimDisplay;
     public Image backgroundDisplay;
     public SVGImage iconDisplay;
+    public SVGImage shadowDisplay;
     public TextMeshProUGUI valueDisplay;
     public int colour;
     public int value;
@@ -21,37 +22,37 @@ public class Card : MonoBehaviour
     public Hand hand;
     public Sprite[] numberIcons;
     public Transform[] allImages;
+    public GameObject lockIcon;
+    private CanvasGroup cg;
 
     void Update()
     {
         // References
         gameManager = (gameManager == null) ? FindObjectOfType<GameManager>() : gameManager;
         hand = (hand == null) ? FindObjectOfType<Hand>() : hand;
+        cg = (cg == null) ? GetComponent<CanvasGroup>() : cg;
 
         // Main colour
         Color mainColour = (colour > -1) ? gameManager.colours[colour] : Color.black;
         
         // Trim
-        trimDisplay.color = mainColour;
+        trimDisplay.color = Color.white;
 
         // Background
-        backgroundDisplay.color = new Color(mainColour.r + 0.55f, mainColour.g  + 0.55f, mainColour.b + 0.55f);
+        backgroundDisplay.color = new Color(mainColour.r + 0.15f, mainColour.g  + 0.15f, mainColour.b + 0.15f);
 
         // SVG Image
-        if (colour > - 1)
-        {
-            iconDisplay.sprite = gameManager.cardIcons[colour];
-        }
-        
+        iconDisplay.sprite = (colour > -1) ? gameManager.cardIcons[colour] : iconDisplay.sprite;
         iconDisplay.gameObject.SetActive(colour > -1);
+        shadowDisplay.sprite = iconDisplay.sprite;
+        shadowDisplay.gameObject.SetActive(iconDisplay.gameObject.activeInHierarchy);
 
-        // SVG TESTING
-        //Scene scene = SVGParser.ImportSVG(new System.IO.StringReader(svgFile.text)).Scene;
-        //Scene scene = VectorUtils.BuildScene(svgImage.sprite, 1.0f);
-        //TraverseSceneNode(scene.Root, 0);
+        // Display lock or number
+        lockIcon.SetActive(colour > -1 && value == -1);
+        valueDisplay.gameObject.SetActive(!lockIcon.activeInHierarchy);
         
         // Value display
-        valueDisplay.color = new Color(mainColour.r + 0.15f, mainColour.g  + 0.15f, mainColour.b + 0.15f);
+        valueDisplay.color = Color.white; //new Color(mainColour.r + 0.15f, mainColour.g  + 0.15f, mainColour.b + 0.15f);
         if (colour == -1)
         {
             // Randomise card
@@ -61,7 +62,7 @@ public class Card : MonoBehaviour
         else if (colour == -2)
         {
             // Fill empty boards card
-            valueDisplay.text = $"<size=16>Set Empty Boards' Values to {value}";
+            valueDisplay.text = $"<size=16>Set Empty Board Values to {value}";
             valueDisplay.alignment = TextAlignmentOptions.Center;
         }
         else if (value == 0)
@@ -80,6 +81,12 @@ public class Card : MonoBehaviour
         {
             allImages = GetComponentsInChildren<Transform>();
         }
+
+        // Make the card transparent if its not playable yet
+        if (Application.isPlaying)
+        {
+            cg.alpha = (hand.canPlayCard && gameManager.turn == 0 || gameManager.turn == -1) ? 1 : 0.5f;
+        }
     }
 
     public void PlayCard()
@@ -88,17 +95,27 @@ public class Card : MonoBehaviour
         AudioManager.Play("card1", "card2");
 
         // Play card
-        if (colour > - 1)
+        if (colour > - 1 && value > -1)
         {
             // Normal cards
-            gameManager.boards.FirstOrDefault(board => board.boardNumber == colour).value = (value == 0) ? Random.Range(1,10) : value;
+            if (!gameManager.boards.FirstOrDefault(board => board.boardNumber == colour).isLocked)
+            {
+                gameManager.boards.FirstOrDefault(board => board.boardNumber == colour).value = (value == 0) ? Random.Range(1,10) : value;
+            }
+        }
+        else if (colour > - 1 && value == -1)
+        {
+            // Lock board cards
+            gameManager.boards.FirstOrDefault(board => board.boardNumber == colour).isLocked = true;
+            gameManager.boards.FirstOrDefault(board => board.boardNumber == colour).turnToUnlock = gameManager.totalTurns + gameManager.activePlayers;
+
         }
         else if (colour == -1) // Special cards
         {
             // Randomise current values
             foreach (Board board in gameManager.boards)
             {
-                if (board.gameObject.activeInHierarchy && board.value > 0)
+                if (board.gameObject.activeInHierarchy && board.value > 0 && !board.isLocked)
                 {
                     // Make sure the new value is different from the old value
                     int oldValue = board.value;
