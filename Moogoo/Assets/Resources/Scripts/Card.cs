@@ -97,7 +97,12 @@ public class Card : MonoBehaviour
             // Normal cards
             if (!gameManager.boards.FirstOrDefault(board => board.boardNumber == colour).isLocked)
             {
-                gameManager.boards.FirstOrDefault(board => board.boardNumber == colour).value = (value == 0) ? Random.Range(1,10) : value;
+                int newValue = value;
+                while (newValue == value)
+                {
+                    newValue = Random.Range(1, 10);
+                }
+                gameManager.boards.FirstOrDefault(board => board.boardNumber == colour).value = (value == 0) ? newValue : value;
 
                 // Play sound
                 AudioManager.Play("card1", "card2");

@@ -572,6 +572,18 @@ PrefabInstance:
       propertyPath: gameManager
       value: 
       objectReference: {fileID: 1573179415}
+    - target: {fileID: 1133383609817759369, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1133383609817759369, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
+      propertyPath: m_Color.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1133383609817759369, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1196973815628435070, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -4104,7 +4116,7 @@ MonoBehaviour:
   playerData: {fileID: 691624154}
   playerIndex: 0
   movingChip: {fileID: 2077304675}
-  personality: 2
+  personality: 1
 --- !u!1 &696348949
 GameObject:
   m_ObjectHideFlags: 0
@@ -4511,11 +4523,11 @@ PrefabInstance:
       objectReference: {fileID: 1573179415}
     - target: {fileID: 1133383609817759369, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_Color.b
-      value: 0.34901965
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1133383609817759369, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_Color.g
-      value: 0.74555355
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1133383609817759369, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_Color.r
@@ -5714,11 +5726,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1133383609817759369, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_Color.g
-      value: 0.34895068
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1133383609817759369, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_Color.r
-      value: 0.85423076
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1196973815628435070, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_AnchorMax.y
@@ -6628,12 +6640,16 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1573179415}
     - target: {fileID: 1133383609817759369, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1133383609817759369, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_Color.g
-      value: 0.6273999
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1133383609817759369, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_Color.r
-      value: 0.34901965
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1196973815628435070, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_AnchorMax.y
@@ -8858,11 +8874,11 @@ PrefabInstance:
       objectReference: {fileID: 1573179415}
     - target: {fileID: 1133383609817759369, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_Color.b
-      value: 0.34901965
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1133383609817759369, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_Color.g
-      value: 0.94355804
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1133383609817759369, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_Color.r
@@ -10510,7 +10526,7 @@ MonoBehaviour:
   playerData: {fileID: 0}
   playerIndex: 0
   movingChip: {fileID: 2077304675}
-  personality: 2
+  personality: 1
 --- !u!1001 &1636309218
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10569,7 +10585,7 @@ PrefabInstance:
       objectReference: {fileID: 1573179415}
     - target: {fileID: 1133383609817759369, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_Color.b
-      value: 0.34901965
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1133383609817759369, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_Color.g
@@ -10577,7 +10593,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1133383609817759369, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_Color.r
-      value: 0.5136474
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1196973815628435070, guid: d4838d990b4bff52d81d589861fbaa65, type: 3}
       propertyPath: m_AnchorMax.y
