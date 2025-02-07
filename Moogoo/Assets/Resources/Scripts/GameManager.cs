@@ -88,12 +88,20 @@ public class GameManager : MonoBehaviour
         }
         betScore = PlayerPrefs.GetInt("GameMode", 0) == 1;
         languageIndex = PlayerPrefs.GetInt("Language", 0);
+        startButton.GetComponentInChildren<TextMeshProUGUI>().text = Language.language[10, languageIndex];
+        for (int i = 0; i < settingsLabels.Length; i++)
+        {
+            settingsLabels[i].text = Language.language[18 + i, languageIndex];
+        }
         flagDisplay.sprite = flags[languageIndex];
         for (int i = 0; i < activePlayers; i++)
         {
             Debug.Log($"PLAYER {i}: {PlayerPrefs.GetInt($"IconIndex_{i}", 0)}");
             players[i].iconIndex = PlayerPrefs.GetInt($"IconIndex_{i}", 0);
         }
+        nameInput.text = PlayerPrefs.GetString("Name", "");
+        soundSlider.value = PlayerPrefs.GetFloat("Sound", 0.5f);
+        musicSlider.value = PlayerPrefs.GetFloat("Music", 0);
     }
 
     void Update()
@@ -630,6 +638,12 @@ public class GameManager : MonoBehaviour
 
         settingsWindow.SetActive(!settingsWindow.activeInHierarchy);
         Time.timeScale = (settingsWindow.activeInHierarchy) ? 0 : 1;
+
+        // Save settings
+        PlayerPrefs.SetString("Name", nameInput.text);
+        PlayerPrefs.SetFloat("Sound", soundSlider.value);
+        PlayerPrefs.SetFloat("Music", musicSlider.value);
+        PlayerPrefs.Save();
     }
 
     public void UIButton()
