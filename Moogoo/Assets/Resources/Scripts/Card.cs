@@ -56,23 +56,23 @@ public class Card : MonoBehaviour
         if (colour == -1)
         {
             // Randomise card
-            valueDisplay.text = "<size=16>Randomise Existing Values";
+            valueDisplay.text = $"<size=16>{Language.language[16, gameManager.languageIndex]}";
             valueDisplay.alignment = TextAlignmentOptions.Center;
         }
         else if (colour == -2)
         {
             // Fill empty boards card
-            valueDisplay.text = $"<size=16>Set Empty Board Values to {value}";
+            valueDisplay.text = $"<size=16>{Language.language[17, gameManager.languageIndex]}{value}";
             valueDisplay.alignment = TextAlignmentOptions.Center;
         }
         else if (value == 0)
         {
-            valueDisplay.text = "?";
+            valueDisplay.text = Language.language[15, gameManager.languageIndex];
             valueDisplay.alignment = TextAlignmentOptions.TopLeft;
         }
         else if (value > 0)
         {
-            valueDisplay.text = value.ToString();
+            valueDisplay.text = Language.language[value, gameManager.languageIndex];
             valueDisplay.alignment = TextAlignmentOptions.TopLeft;
         }
 
@@ -89,20 +89,26 @@ public class Card : MonoBehaviour
         }
     }
 
-    public void PlayCard()
+    public void PlayCurrentCard()
     {
+        PlayCard(colour, value, transform.GetSiblingIndex());
+    }
+
+    public void PlayCard(int _index, int _value, int _cardIndex)
+    {
+        Debug.Log($"{_index}:{_value}");
         // Play card
-        if (colour > - 1 && value > -1)
+        if (_index > - 1 && _value > -1)
         {
             // Normal cards
-            if (!gameManager.boards.FirstOrDefault(board => board.boardNumber == colour).isLocked)
+            if (!gameManager.boards.FirstOrDefault(board => board.boardNumber == _index).isLocked)
             {
-                int newValue = value;
-                while (newValue == value)
+                int newValue = _value;
+                while (newValue == _value)
                 {
                     newValue = Random.Range(1, 10);
                 }
-                gameManager.boards.FirstOrDefault(board => board.boardNumber == colour).value = (value == 0) ? newValue : value;
+                gameManager.boards.FirstOrDefault(board => board.boardNumber == _index).value = (_value == 0) ? newValue : _value;
 
                 // Play sound
                 AudioManager.Play("card1", "card2");
@@ -113,14 +119,14 @@ public class Card : MonoBehaviour
                 AudioManager.Play("discard");
             }
         }
-        else if (colour > - 1 && value == -1)
+        else if (_index > - 1 && _value == -1)
         {
             // Lock board cards
-            gameManager.boards.FirstOrDefault(board => board.boardNumber == colour).isLocked = true;
-            gameManager.boards.FirstOrDefault(board => board.boardNumber == colour).turnToUnlock = gameManager.totalTurns + gameManager.activePlayers;
+            gameManager.boards.FirstOrDefault(board => board.boardNumber == _index).isLocked = true;
+            gameManager.boards.FirstOrDefault(board => board.boardNumber == _index).turnToUnlock = gameManager.totalTurns + gameManager.activePlayers;
 
         }
-        else if (colour == -1) // Special cards
+        else if (_index == -1) // Special cards
         {
             // Randomise current values
             bool nothingChanged = true;
@@ -148,7 +154,7 @@ public class Card : MonoBehaviour
                 AudioManager.Play("card1", "card2");
             }
         }
-        else if (colour == -2)
+        else if (_index == -2)
         {
             // Fill empty boards
             bool nothingChanged = true;
@@ -157,7 +163,7 @@ public class Card : MonoBehaviour
                 if (board.gameObject.activeInHierarchy && board.value == 0 && !board.isLocked)
                 {
                     nothingChanged = false;
-                    board.value = value;
+                    board.value = _value;
                 }
             }
 
@@ -172,18 +178,20 @@ public class Card : MonoBehaviour
         }
 
         // Discard card from hand
-        gameManager.players[0].hand.RemoveAt(transform.GetSiblingIndex());
-        gameManager.discardPile.Add($"{colour}:{value}");
-
-        // Draw a new card
-        gameManager.DealCards(1, 0);
-        hand.canPlayCard = false;
+        gameManager.players[gameManager.turn].hand.RemoveAt(_cardIndex);
+        gameManager.discardPile.Add($"{_index}:{_value}");
         StartCoroutine(WaitForTurn());
     }
 
     IEnumerator WaitForTurn()
     {
-        yield return new WaitForSeconds(1.0f);
+        // Draw a new card
+        yield return new WaitForSeconds(0.5f);
+        gameManager.DealCards(1, gameManager.turn);
+        hand.canPlayCard = false;
+
+        // Go to next turn
+        yield return new WaitForSeconds(0.5f);
         gameManager.NextTurn();
     }
 }

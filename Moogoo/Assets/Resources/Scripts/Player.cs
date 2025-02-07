@@ -10,10 +10,6 @@ public class Player : NetworkBehaviour
     void Update()
     {
         // Change name of player object
-        gameObject.name = "Player";
-        if (playerName != "")
-        {
-            gameObject.name += ": " + playerName;
-        }
+        gameObject.name = (playerName != "") ? $"Player: {playerName}" : "Player";
     }
 }

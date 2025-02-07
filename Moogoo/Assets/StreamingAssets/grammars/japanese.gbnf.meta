@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 5ba51fef232cbd4488f111e2ab952536
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275927
+  packageName: llama.cs
+  packageVersion: 1.2.1
+  assetPath: Assets/StreamingAssets/grammars/japanese.gbnf
+  uploadId: 699421

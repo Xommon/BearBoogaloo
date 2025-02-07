@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 3ac1917a1908c4f87b9c3ae23456c26d
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275927
+  packageName: llama.cs
+  packageVersion: 1.2.1
+  assetPath: Assets/StreamingAssets/ggml-metal.metal
+  uploadId: 699421

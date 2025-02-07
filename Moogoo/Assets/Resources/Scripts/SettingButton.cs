@@ -20,7 +20,7 @@ public class SettingButton : MonoBehaviour
         switch (settingIndex)
         {
             case 0:
-                textDisplay.text = $"Max Bet\n<size=40>{gameManager.maxBet}";
+                textDisplay.text = $"{Language.language[11, gameManager.languageIndex]}\n<size=40>{Language.language[gameManager.maxBet, gameManager.languageIndex]}";
                 break;
             case 1:
                 int boardsCount = 0;
@@ -31,10 +31,13 @@ public class SettingButton : MonoBehaviour
                         boardsCount++;
                     }
                 }
-                textDisplay.text = $"Boards\n<size=40>{boardsCount}";
+                textDisplay.text = $"{Language.language[12, gameManager.languageIndex]}\n<size=40>{Language.language[boardsCount, gameManager.languageIndex]}";
                 break;
             case 2:
-                textDisplay.text = (gameManager.betScore) ? $"Score Type\n<size=40>1" : $"Score Type\n<size=40>2";
+                textDisplay.text = gameManager.betScore ? $"{Language.language[13, gameManager.languageIndex]}\n<size=40>{Language.language[1, gameManager.languageIndex]}" : $"{Language.language[13, gameManager.languageIndex]}\n<size=40>{Language.language[2, gameManager.languageIndex]}";
+                break;
+            case 3:
+                textDisplay.text = $"{Language.language[14, gameManager.languageIndex]}\n\n ";
                 break;
         }
 

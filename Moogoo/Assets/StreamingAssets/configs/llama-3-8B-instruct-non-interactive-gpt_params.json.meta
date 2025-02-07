@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ad5853b6b5634e24bbf51d0c428fe352
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275927
+  packageName: llama.cs
+  packageVersion: 1.2.1
+  assetPath: Assets/StreamingAssets/configs/llama-3-8B-instruct-non-interactive-gpt_params.json
+  uploadId: 699421

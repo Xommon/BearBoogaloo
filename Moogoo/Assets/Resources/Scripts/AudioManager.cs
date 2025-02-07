@@ -5,7 +5,7 @@ public static class AudioManager
     public static void Play(params string[] fileNames)
     {
         // Find audio source
-        AudioSource audioSource = UnityEngine.Object.FindObjectOfType<AudioSource>();
+        AudioSource audioSource = UnityEngine.Object.FindObjectOfType<GameManager>().soundAS;
         if (audioSource == null)
         {
             Debug.LogError("No AudioSource found in the scene.");
@@ -23,13 +23,14 @@ public static class AudioManager
 
         // Play the audio clip
         audioSource.clip = sound;
+        audioSource.loop = false;
         audioSource.Play();
     }
 
-    public static void Play(float volume, params string[] fileNames)
+    public static void PlayMusic(params string[] fileNames)
     {
         // Find audio source
-        AudioSource audioSource = UnityEngine.Object.FindObjectOfType<AudioSource>();
+        AudioSource audioSource = UnityEngine.Object.FindObjectOfType<GameManager>().musicAS;
         if (audioSource == null)
         {
             Debug.LogError("No AudioSource found in the scene.");
@@ -45,9 +46,9 @@ public static class AudioManager
             return;
         }
 
-        // Set volume and play the audio clip
-        audioSource.volume = volume;
+        // Play the audio clip
         audioSource.clip = sound;
+        audioSource.loop = true;
         audioSource.Play();
     }
 }

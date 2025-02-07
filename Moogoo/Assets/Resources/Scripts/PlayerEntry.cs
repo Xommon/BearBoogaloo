@@ -13,12 +13,13 @@ public class PlayerEntry : MonoBehaviour
 
     public TextMeshProUGUI nameDisplay;
     public Image iconDisplay;
+    private RectTransform iconRT;
     public TextMeshProUGUI scoreDisplay;
+    private RectTransform scoreRT;
     public Image background;
     public AI ai;
 
     public string name;
-    [HideInInspector]
     public int playerIndex;
     public int iconIndex;
     public int score;
@@ -37,19 +38,21 @@ public class PlayerEntry : MonoBehaviour
         }
 
         playerIndex = (ai != null) ? ai.playerIndex : 0;
-
-        // Change personality
-        if (ai != null)
-        {
-            Array values = Enum.GetValues(typeof(AI.Personality));
-            ai.personality = (AI.Personality)values.GetValue(UnityEngine.Random.Range(0, values.Length));
-        }
     }
 
     void Update()
     {
+        gameManager = (gameManager == null) ? FindObjectOfType<GameManager>() : gameManager;
+        scoreRT = (scoreRT == null) ? scoreDisplay.GetComponent<RectTransform>() : scoreRT;
+        iconRT = (iconRT == null) ? iconDisplay.GetComponent<RectTransform>() : iconRT;
         nameDisplay.text = name;
-        scoreDisplay.text = score.ToString();
+        scoreDisplay.text = Language.language[score, gameManager.languageIndex];
+
+        // Switch to RTL or LTR
+        scoreRT.anchoredPosition = (gameManager.languageIndex > 1) ? new Vector2(-55, 0) : new Vector2(100, 0);
+        iconRT.anchoredPosition = (gameManager.languageIndex > 1) ? new Vector2(55, -1) : new Vector2(-92, -1);
+        nameDisplay.isRightToLeftText = gameManager.languageIndex > 1;
+        nameDisplay.alignment = gameManager.languageIndex > 1 ? TextAlignmentOptions.Right : TextAlignmentOptions.Left;
 
         // Highlight when it's the player's turn
         background.color = (gameManager.turn == transform.GetSiblingIndex()) ? new Color(1.0f, 0.88f, 0.0f, 1.0f) : background.color = new Color(0.53f, 0.65f, 0.72f, 0.75f);
@@ -70,7 +73,6 @@ public class PlayerEntry : MonoBehaviour
         {
             AudioManager.Play("chip0", "chip1", "chip2");
         }
-        
 
         // Set the initial value
         int newIconIndex = 0;
@@ -94,6 +96,10 @@ public class PlayerEntry : MonoBehaviour
 
         // Set the final value
         iconIndex = newIconIndex;
+        
+        // Save the value for player
+        PlayerPrefs.SetInt($"IconIndex_{playerIndex}", iconIndex);
+        PlayerPrefs.Save();
     }
 
     public void ActivateAI()
@@ -161,7 +167,7 @@ public class PlayerEntry : MonoBehaviour
 
     void OnEnable()
     {
-        if (transform.GetSiblingIndex() == 0)
+        /*if (transform.GetSiblingIndex() == 0)
         {
             return;
         }
@@ -181,6 +187,6 @@ public class PlayerEntry : MonoBehaviour
             randomName = gameManager.cpuNames[UnityEngine.Random.Range(0, gameManager.cpuNames.Length)];
         } while (activeNames.Contains(randomName));
 
-        name = randomName;
+        name = randomName;*/
     }
 }

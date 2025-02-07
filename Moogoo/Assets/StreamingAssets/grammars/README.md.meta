@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: e7f1493854b8a1d479a482b8e97d1bb7
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275927
+  packageName: llama.cs
+  packageVersion: 1.2.1
+  assetPath: Assets/StreamingAssets/grammars/README.md
+  uploadId: 699421

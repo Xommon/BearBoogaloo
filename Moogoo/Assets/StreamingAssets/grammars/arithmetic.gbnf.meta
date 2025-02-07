@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 7659372dc56ffbe42a90bd88e06c6b9c
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275927
+  packageName: llama.cs
+  packageVersion: 1.2.1
+  assetPath: Assets/StreamingAssets/grammars/arithmetic.gbnf
+  uploadId: 699421

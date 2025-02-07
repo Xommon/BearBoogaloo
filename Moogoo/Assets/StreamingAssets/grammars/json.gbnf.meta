@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 1be629a128f4b0c4eb5256079b28acf8
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275927
+  packageName: llama.cs
+  packageVersion: 1.2.1
+  assetPath: Assets/StreamingAssets/grammars/json.gbnf
+  uploadId: 699421

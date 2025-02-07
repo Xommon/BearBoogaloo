@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 07646f3e6dc0ef849a320ea667c16d43
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 275927
+  packageName: llama.cs
+  packageVersion: 1.2.1
+  assetPath: Assets/StreamingAssets/configs/llava-v1.5-7b-gpt_params.json
+  uploadId: 699421

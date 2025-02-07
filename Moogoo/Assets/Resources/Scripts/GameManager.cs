@@ -39,25 +39,70 @@ public class GameManager : MonoBehaviour
     private bool boardsIncrease;
     public Animator boardsAnimator;
     public Animator playersAnimator;
+    public Sprite[] flags;
+    public Image flagDisplay;
 
     // Game
     public bool bettingTime;
     public List<string> discardPile;
     public bool betScore;
     public int activePlayers;
+    public Board[] activeBoards;
+
+    // Settings
+    public GameObject settingsWindow;
+    [Range(0.0f, 1.0f)]
+    public AudioSource soundAS;
+    [Range(0.0f, 1.0f)]
+    public AudioSource musicAS;
+    [Range(0, 3)]
+    public int languageIndex;
+    public TMP_InputField nameInput;
+    public Slider soundSlider;
+    public Slider musicSlider;
+    public Button languageButton;
+    public TextMeshProUGUI[] settingsLabels;
 
     void Start()
     {
         startButton.gameObject.SetActive(true);
-        round = 3;
-
+        
         // Set game up
         playersAnimator.enabled = false;
         boardsAnimator.enabled = false;
+        round = 3;
+
+        // Play music
+        AudioManager.PlayMusic("Music0");
+
+        // Load settings
+        maxBet = PlayerPrefs.GetInt("MaxBet", 4);
+        boardsEnabled = PlayerPrefs.GetInt("BoardCount", 6);
+        for (int i = 0; i < boards.Count; i++)
+        {
+            boards[i].gameObject.SetActive(i < boardsEnabled);
+        }
+        for (int i = 0; i < 6; i++)
+        {
+            players[i].gameObject.SetActive(i < PlayerPrefs.GetInt("PlayerCount", 4));
+        }
+        betScore = PlayerPrefs.GetInt("GameMode", 0) == 1;
+        languageIndex = PlayerPrefs.GetInt("Language", 0);
+        flagDisplay.sprite = flags[languageIndex];
+        for (int i = 0; i < activePlayers; i++)
+        {
+            Debug.Log($"PLAYER {i}: {PlayerPrefs.GetInt($"IconIndex_{i}", 0)}");
+            players[i].iconIndex = PlayerPrefs.GetInt($"IconIndex_{i}", 0);
+        }
     }
 
     void Update()
     {
+        // Update settings
+        players[0].name = (nameInput.text == "") ? Language.language[23, languageIndex] : nameInput.text;
+        soundAS.volume = soundSlider.value;
+        musicAS.volume = musicSlider.value;
+
         // Update active players
         int tempActivePlayers = 0;
         foreach (PlayerEntry player in players)
@@ -68,6 +113,26 @@ public class GameManager : MonoBehaviour
             }
         }
         activePlayers = tempActivePlayers;
+
+        // Update active boards
+        int tempActiveBoards = 0;
+        foreach (Board board in boards)
+        {
+            if (board.gameObject.activeInHierarchy)
+            {
+                tempActiveBoards++;
+            }
+        }
+        activeBoards = new Board[tempActiveBoards];
+        int tempIndex = 0;
+        foreach (Board board in boards)
+        {
+            if (board.gameObject.activeInHierarchy)
+            {
+                activeBoards[tempIndex] = board;
+                tempIndex++;
+            }
+        }
 
         // Disable card buttons when it's not your turn
         foreach (Card card in hand.cards)
@@ -184,6 +249,14 @@ public class GameManager : MonoBehaviour
         // Move the game windows
         playersAnimator.enabled = true;
         boardsAnimator.enabled = true;
+
+        // Save the stats
+        PlayerPrefs.SetInt("PlayerCount", activePlayers);
+        PlayerPrefs.SetInt("MaxBet", maxBet);
+        PlayerPrefs.SetInt("BoardCount", boardsEnabled);
+        PlayerPrefs.SetInt("GameMode", betScore ? 1 : 0);
+        PlayerPrefs.SetInt("Language", languageIndex);
+        PlayerPrefs.Save();
     }
 
     public void SetupGame()
@@ -391,7 +464,10 @@ public class GameManager : MonoBehaviour
     public void DealCards(int amount)
     {
         // Play sound
-        AudioManager.Play("card1", "card2");
+        if (turn < 0)
+        {
+            AudioManager.Play("card1", "card2");
+        }
 
         // Create a new deck if the previous cards run out
         if (deck.Count <= 0)
@@ -415,7 +491,10 @@ public class GameManager : MonoBehaviour
     public void DealCards(int amount, int playerIndex)
     {
         // Play sound
-        AudioManager.Play("card1", "card2");
+        if (turn < 0)
+        {
+            AudioManager.Play("card1", "card2");
+        }
 
         // Create a new deck if the previous cards run out
         if (deck.Count <= 0)
@@ -511,6 +590,20 @@ public class GameManager : MonoBehaviour
         betScore = !betScore;
     }
 
+    public void ChangeLanguage()
+    {
+        // Play sound
+        AudioManager.Play("UI1");
+
+        // Update text
+        languageIndex = (languageIndex == 3) ? 0 : languageIndex + 1;
+        startButton.GetComponentInChildren<TextMeshProUGUI>().text = Language.language[10, languageIndex];
+        for (int i = 0; i < settingsLabels.Length; i++)
+        {
+            settingsLabels[i].text = Language.language[18 + i, languageIndex];
+        }
+    }
+
     IEnumerator EndGame()
     {
         yield return new WaitForSeconds(1.0f);
@@ -528,5 +621,20 @@ public class GameManager : MonoBehaviour
         return players
             .OrderByDescending(player => player.score)
             .ToList();
+    }
+
+    public void ToggleSettingsWindow()
+    {
+        // Play sound
+        AudioManager.Play("UI1");
+
+        settingsWindow.SetActive(!settingsWindow.activeInHierarchy);
+        Time.timeScale = (settingsWindow.activeInHierarchy) ? 0 : 1;
+    }
+
+    public void UIButton()
+    {
+        // Play sound
+        AudioManager.Play("UI1");
     }
 }

@@ -1,0 +1,11 @@
+{
+    "n_ctx": 0,
+    "n_batch": 512,
+    "n_gpu_layers": 64,
+    
+    "model": "Assets/StreamingAssets/llava-v1.5-7b-Q4_K.gguf",
+    "mmproj": "Assets/StreamingAssets/llava-v1.5-7b-mmproj-Q4_0.gguf",
+    "prompt": "A chat between a curious human and an artificial intelligence assistant.  The assistant gives helpful, detailed, and polite answers to the human's questions.",
+    
+    "conversation": true
+}
