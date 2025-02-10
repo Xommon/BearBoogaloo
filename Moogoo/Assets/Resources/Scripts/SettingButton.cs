@@ -37,7 +37,7 @@ public class SettingButton : MonoBehaviour
                 textDisplay.text = gameManager.betScore ? $"{Language.language[13, gameManager.languageIndex]}\n<size=40>{Language.language[1, gameManager.languageIndex]}" : $"{Language.language[13, gameManager.languageIndex]}\n<size=40>{Language.language[2, gameManager.languageIndex]}";
                 break;
             case 3:
-                textDisplay.text = $"{Language.language[14, gameManager.languageIndex]}\n\n ";
+                textDisplay.text = $"{Language.language[14, gameManager.languageIndex]}\n<size=40>{gameManager.difficulty}";
                 break;
         }
 

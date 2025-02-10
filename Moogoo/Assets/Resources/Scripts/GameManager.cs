@@ -6,6 +6,7 @@ using System.Collections;
 using System.Linq;
 using UnityEngine.SceneManagement;
 using TMPro;
+using System;
 
 public class GameManager : MonoBehaviour
 {
@@ -48,6 +49,7 @@ public class GameManager : MonoBehaviour
     public bool betScore;
     public int activePlayers;
     public Board[] activeBoards;
+    public Button restartButton;
 
     // Settings
     public GameObject settingsWindow;
@@ -62,6 +64,16 @@ public class GameManager : MonoBehaviour
     public Slider musicSlider;
     public Button languageButton;
     public TextMeshProUGUI[] settingsLabels;
+    [Range(1,4)]
+    public int difficulty;
+
+    // Level
+    [Range(0, 1200)]
+    public int totalPoints;
+    public int tempPoints;
+    public TextMeshProUGUI levelDisplay;
+    public Slider levelSlider;
+    public Transform leaderboardObject;
 
     void Start()
     {
@@ -87,13 +99,13 @@ public class GameManager : MonoBehaviour
             players[i].gameObject.SetActive(i < PlayerPrefs.GetInt("PlayerCount", 4));
         }
         betScore = PlayerPrefs.GetInt("GameMode", 0) == 1;
+        players[0].iconIndex = PlayerPrefs.GetInt("PlayerIcon", 0);
         languageIndex = PlayerPrefs.GetInt("Language", 0);
         startButton.GetComponentInChildren<TextMeshProUGUI>().text = Language.language[10, languageIndex];
         for (int i = 0; i < settingsLabels.Length; i++)
         {
             settingsLabels[i].text = Language.language[18 + i, languageIndex];
         }
-        flagDisplay.sprite = flags[languageIndex];
         for (int i = 0; i < activePlayers; i++)
         {
             Debug.Log($"PLAYER {i}: {PlayerPrefs.GetInt($"IconIndex_{i}", 0)}");
@@ -102,10 +114,30 @@ public class GameManager : MonoBehaviour
         nameInput.text = PlayerPrefs.GetString("Name", "");
         soundSlider.value = PlayerPrefs.GetFloat("Sound", 0.5f);
         musicSlider.value = PlayerPrefs.GetFloat("Music", 0);
+        totalPoints = PlayerPrefs.GetInt("TotalPoints", 0);
     }
 
     void Update()
     {
+        // Level
+        int[] pointMaxes = new int[]{500, 750, 1130, 1700, 2500, 3750, 5500, 8500, 12000};
+        int tempTotal = 0;
+        for (int i = 0; i < 10; i++)
+        {
+            if (i > 0)
+            {   
+                tempTotal += pointMaxes[i];
+            }
+
+            if (totalPoints < pointMaxes[i])
+            {
+                levelDisplay.text = $"{Language.language[28, languageIndex]} {Language.language[i + 1, languageIndex]}";
+                int previousMax = (i == 0) ? 0 : pointMaxes[i - 1]; // Previous level max
+                levelSlider.value = (float)(totalPoints - previousMax) / (pointMaxes[i] - previousMax);
+                break;
+            }
+        }
+
         // Update settings
         players[0].name = (nameInput.text == "") ? Language.language[23, languageIndex] : nameInput.text;
         soundAS.volume = soundSlider.value;
@@ -214,7 +246,7 @@ public class GameManager : MonoBehaviour
                 string randomName;
                 do
                 {
-                    randomName = cpuNames[Random.Range(0, cpuNames.Length)];
+                    randomName = cpuNames[UnityEngine.Random.Range(0, cpuNames.Length)];
                 } while (activeNames.Contains(randomName));
 
                 players[i].name = randomName;
@@ -264,6 +296,7 @@ public class GameManager : MonoBehaviour
         PlayerPrefs.SetInt("BoardCount", boardsEnabled);
         PlayerPrefs.SetInt("GameMode", betScore ? 1 : 0);
         PlayerPrefs.SetInt("Language", languageIndex);
+        PlayerPrefs.SetInt("PlayerIcon", players[0].iconIndex);
         PlayerPrefs.Save();
     }
 
@@ -286,7 +319,7 @@ public class GameManager : MonoBehaviour
         else
         {
             yield return new WaitForSeconds(0.5f);
-            turn = Random.Range(0, players.Count(obj => obj.gameObject.activeInHierarchy));
+            turn = UnityEngine.Random.Range(0, players.Count(obj => obj.gameObject.activeInHierarchy));
             NextTurn();
         }
     }
@@ -466,7 +499,7 @@ public class GameManager : MonoBehaviour
         }
 
         // Shuffle deck
-        deck = deck.OrderBy(x => Random.value).ToList();
+        deck = deck.OrderBy(x => UnityEngine.Random.value).ToList();
     }
 
     public void DealCards(int amount)
@@ -540,15 +573,15 @@ public class GameManager : MonoBehaviour
 
             if (i == previousTurn)
             {
-                players[turn].React(0, Random.Range(0.0f, 1.0f));
+                players[turn].React(0, UnityEngine.Random.Range(0.0f, 1.0f));
             }
             else if (players[i].score < players[i].oldScore)
             {
-                players[i].React(1, Random.Range(0.0f, 1.0f));
+                players[i].React(1, UnityEngine.Random.Range(0.0f, 1.0f));
             }
             else if (players[i].score == players[i].oldScore)
             {
-                //players[i].React(2, Random.Range(0.0f, 1.0f));
+                //players[i].React(2, UnityEngine.Random.Range(0.0f, 1.0f));
             }
         }
     }
@@ -615,7 +648,52 @@ public class GameManager : MonoBehaviour
     IEnumerator EndGame()
     {
         yield return new WaitForSeconds(1.0f);
+        restartButton.gameObject.SetActive(false);
         endGameWindow.SetActive(true);
+
+        // Reward points based on the game
+        ScoreEntry[] leaderboard = leaderboardObject.GetComponentsInChildren<ScoreEntry>();
+        Array.Reverse(leaderboard);
+        int playerPlace = leaderboard.FirstOrDefault(s => s.scoreIndex == 0).transform.GetSiblingIndex() + 1;
+        tempPoints = (playerPlace == activePlayers) ? totalPoints + playerPlace * 120 : totalPoints + playerPlace * 100;
+        
+        // Move level bar to end game screen
+        levelSlider.transform.parent = endGameWindow.transform;
+        levelSlider.transform.SetSiblingIndex(1);
+        levelSlider.GetComponent<RectTransform>().anchoredPosition = new Vector2(50, 230);
+
+        StartCoroutine(IncreasePoints());
+
+        // Save player points
+        PlayerPrefs.SetInt("TotalPoints", tempPoints);
+        PlayerPrefs.Save();
+    }
+
+    IEnumerator IncreasePoints()
+    {
+        if (totalPoints / (float)tempPoints < 0.75f)
+        {
+            yield return new WaitForSeconds(0.0025f);
+        }
+        else if (totalPoints / (float)tempPoints < 0.95f)
+        {
+            yield return new WaitForSeconds(0.005f);
+        }
+        else if (totalPoints / (float)tempPoints < 0.99f)
+        {
+            yield return new WaitForSeconds(0.01f);
+        }
+        
+        totalPoints++;
+
+        if (tempPoints > totalPoints)
+        {
+            StartCoroutine(IncreasePoints());
+        }
+        else
+        {
+            restartButton.gameObject.SetActive(true);
+        }
     }
 
     public void RestartGame()

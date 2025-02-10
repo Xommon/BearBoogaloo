@@ -12,6 +12,7 @@ public class ScoreEntry : MonoBehaviour
     public string name;
     public int score;
     private GameManager gameManager;
+    public int scoreIndex;
 
     void Update()
     {

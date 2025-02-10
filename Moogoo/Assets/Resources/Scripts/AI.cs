@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using NUnit.Framework.Interfaces;
+using System.Threading;
+using Mono.Cecil;
+using System.Runtime.ExceptionServices;
 
 public class BoardStatus
 {
@@ -50,13 +53,6 @@ public class AI : MonoBehaviour
 
     [Range(0, 10)] public int strategy = 5; // Slider for AI's strategy level
 
-    // Board reading variables
-    private int[] _scores;
-    private BoardStatus[] _boards;
-    private CardStatus[] _cards;
-    [TextArea(1, 20)]
-    public string _gameReview;
-
     void Start()
     {
         playerIndex = transform.GetSiblingIndex();
@@ -70,267 +66,133 @@ public class AI : MonoBehaviour
 
     public IEnumerator PlayTurn()
     {
-        // Define variables of the game
-        _scores = new int[gameManager.activePlayers];
-        _boards = new BoardStatus[gameManager.activeBoards.Length];
-        _cards = new CardStatus[gameManager.players[playerIndex].hand.Count];
-        _gameReview = "";
-        
-        // Hold the player's final choice for bet and card
-        int[] finalChoice = new int[] { -1, -1 };
+        // Prep the final choices
+        int[] finalChoice = {-1, -1};
 
-        // Read player scores
-        for (int i = 0; i < gameManager.activePlayers; i++)
+        // Choose a card
+        bool goodChoice = false;
+        int count = 0;
+        int cardBoardNumber = 0;
+        Board cardBoard = null;
+        int cardValue = 0;
+
+        while (!goodChoice)
         {
-            _scores[i] = gameManager.players[i].score;
-            _gameReview += $"PLAYER {i}: {_scores[i]}\n";
+            // Choose a random card
+            finalChoice[1] = UnityEngine.Random.Range(0, playerData.hand.Count);
+
+            // Read the card
+            cardBoardNumber = int.Parse(playerData.hand[finalChoice[1]].Split(":")[0]);
+            cardValue = int.Parse(playerData.hand[finalChoice[1]].Split(":")[1]);
+
+            if (cardBoardNumber > 0 && cardBoardNumber < 5)
+            {
+                cardBoard = gameManager.boards.FirstOrDefault(b => b.boardNumber == cardBoardNumber);
+            }
+
+            // Assess if it's a good choice
+            if ( // Raise
+                cardBoardNumber > 0 && cardBoardNumber < 5 && // Normal card
+                BoardPlayerBets(playerIndex, cardBoard) > 0 && // Board has player's bets
+                cardBoard.value <= cardValue && // The card will raise the board's value
+                !cardBoard.isLocked // Board is not locked
+            )
+            {
+                goodChoice = true;
+            }
+            else if ( // Lower
+                cardBoardNumber > 0 && cardBoardNumber < 5 && // Normal card
+                BoardPlayerBets(playerIndex, cardBoard) == 0 && // Board has NO player bets
+                (cardBoard.value > cardValue || cardValue == 0) && // The card will lower the board's value OR randomise it
+                cardBoard.bets.Count > 0 && // There are other bets
+                !cardBoard.isLocked // Board is not locked
+            )
+            {
+                goodChoice = true;
+            }
+            else if ( // Lock
+                cardBoardNumber > 0 && cardBoardNumber < 5 && // Normal card
+                BoardPlayerBets(playerIndex, cardBoard) > 0 && // Board has player's bets
+                !LowestValueBoard(cardBoardNumber) && // Not the lowest board number
+                cardValue == -1 && // Card locks the board
+                !cardBoard.isLocked // Board is not locked
+            )
+            {
+                goodChoice = true;
+            }
+            else if ( // Randomise
+                cardBoardNumber == -1 && // Randomise card
+                BoardPlayerBets(playerIndex, GetHighestBoard()) == 0 // Highest board has NO player bets
+            )
+            {
+                goodChoice = true;
+            }
+            else if ( // Set All Valueless
+                cardBoardNumber == -2 && // Set all card
+                //AmountOfEmptyBoards() == 1 && // There is only ONE valueless board
+                GetLowestBoard().value > 0 && // Lowest board is NOT blank
+                GetLowestBoard().value < cardValue && // Playing this card may delete the lowest value
+                BoardPlayerBets(playerIndex, GetLowestBoard()) == 0 // Board has NO player bets
+            )
+            {
+                goodChoice = true;
+            }
+
+            if (count < 20)
+            {
+                count++;
+            }
+            else
+            {
+                Debug.Log("No good choices...");
+                break;
+            }
         }
-
-        _gameReview += "\n";
-
-        // Read board statuses
-        for (int i = 0; i < gameManager.activeBoards.Length; i++)
-        {
-            // Instantiate the board
-            _boards[i] = new BoardStatus();
-            
-            // Board number
-            _boards[i].boardNumber = gameManager.activeBoards[i].boardNumber;
-            _gameReview += $"BOARD {_boards[i].boardNumber}: ";
-
-            // Value
-            _boards[i].value = gameManager.activeBoards[i].value;
-            _gameReview += $"Value: {_boards[i].value} || ";
-
-            // Locked
-            Debug.Log($"LOCK: {i}");
-            _boards[i].isLocked = gameManager.boards[i].isLocked;
-            _gameReview += _boards[i].isLocked ? $"Locked || " : "Unlocked || ";
-
-            // Bets
-            _boards[i].playerBets = new int[gameManager.activePlayers];
-            _gameReview += "Bets: ";
-            if (gameManager.boards[i].bets.Count > 0)
-            {
-                for (int i2 = 0; i2 < gameManager.boards[i].bets.Count; i2++)
-                {
-                    _boards[i].playerBets[gameManager.boards[i].bets[i2]]++;
-                    _gameReview += $"{gameManager.boards[i].bets[i2]} ";
-                }
-            }
-            _gameReview += "\n";
-        }
-
-        _gameReview += "\n";
-
-        // Read player cards
-        for (int i = 0; i < gameManager.players[playerIndex].hand.Count; i++)
-        {
-            // Instantiate the card
-            _cards[i] = new CardStatus();
-            _cards[i].cardIndex = i;
-            _gameReview += $"CARD {i}: ";
-
-            // Board number associated with card
-            _cards[i].boardNumber = int.Parse(gameManager.players[playerIndex].hand[i].Split(':')[0]);
-            _gameReview += $"Board {_cards[i].boardNumber} | ";
-
-            // Value
-            _cards[i].value = int.Parse(gameManager.players[playerIndex].hand[i].Split(':')[1]);
-            _gameReview += $"Value {_cards[i].value}\n";
-
-            // Good
-            _cards[i].goodChoice = 0;
-        }
-
-        // Sort boards from highest amount of the current player's bets to lowest
-        _boards = OrderBoards(playerIndex);
-
-        // Look through the cards to see which plays are good
-        string[] reasoning = new string[5];
-        string _cardStats = $"-- PLAYER {gameManager.turn} --\n";
-        for (int i = 0; i < _cards.Length; i++)
-        {
-            // Get the relevant board from the card
-            BoardStatus boardFromCard = _boards.FirstOrDefault(b => b.boardNumber == _cards[i].boardNumber);
-
-            // Determine whether a card is a good choice to play
-            if (
-                // Raise board value?
-                _cards[i].boardNumber > -1 && // Card has a normal board value
-                _cards[i].value > 0 && // Card is not a randomiser
-                boardFromCard.playerBets[gameManager.turn] > 0 && // Target board has player's bets
-                boardFromCard.value <= _cards[i].value // Target board has a lower value than the potential card
-            ){
-                _cards[i].goodChoice++;
-
-                // If board with bets is in last place
-                if (
-                    LowestValue(_cards[i].boardNumber) // Board is the lowest value
-                )
-                {
-                    _cards[i].goodChoice++;
-                }
-            }
-            else if (
-                // Lower board value?
-                _cards[i].boardNumber > -1 && // Card has a normal board value
-                _cards[i].value > 0 && // Card is not a randomiser
-                boardFromCard.playerBets.Where(p => !(p == gameManager.turn)).ToList().Sum() > 0 && // Target board has bets from other players
-                boardFromCard.value > _cards[i].value // Target board has a higher value than the potential card
-            ){
-                _cards[i].goodChoice++;
-
-                // If board with bets is in first place
-                if (
-                    HighestValue(_cards[i].boardNumber) && // Board is the highest value
-                    boardFromCard.playerBets[gameManager.turn] == 0 // Target board has NONE of the player's bets
-                )
-                {
-                    _cards[i].goodChoice++;
-                }
-            }
-            _cardStats += $"{_cards[i].boardNumber}:{_cards[i].value} = {_cards[i].goodChoice}\n";
-
-            /*_cards[i].goodChoice = 
-
-            // Raise board value?
-            (
-                _cards[i].boardNumber > -1 && // Card has a normal board value
-                _cards[i].value > 0 && // Card is not a randomiser
-                boardFromCard.playerBets[gameManager.turn] > 0 && // Target board has player's bets
-                boardFromCard.value <= _cards[i].value // Target board has a lower value than the potential card
-            ) 
-            || // Lower board value?
-            (
-                _cards[i].boardNumber > -1 && // Card has a normal board value
-                _cards[i].value > 0 && // Card is not a randomiser
-                boardFromCard.playerBets[gameManager.turn] == 0 && // Target board has NONE of the player's bets
-                boardFromCard.value > _cards[i].value // Target board has a higher value than the potential card
-            ); 
-
-            _cardStats += $"{_cards[i].boardNumber}:{_cards[i].value} = {_cards[i].goodChoice}\n";
-            
-            // Special cards
-            /*if (_cards[i].boardNumber == -1) // Randomise values
-            {
-                // It's a good idea to randomise values if the highest value board contains NO bets from the player
-                _cards[i].goodChoice = !(OrderBoards()[0].playerBets[playerIndex] > 0);
-                reasoning[i] = (_cards[i].goodChoice) ? $"PLAYER {gameManager.turn}: Playing Randomise Values Card because the highest value board contains NO bets from me." : "BAD CHOICE";
-            }
-            else if (_cards[i].boardNumber == -2) // Set all empty boards to #
-            {
-                // It's a good idea to set all empty boards to # higher or lower to suit the needs of the player
-                //Debug.Log($"{_cards[i].boardNumber}:{_cards[i].value}");
-                _cards[i].goodChoice = true;
-                reasoning[i] = $"Playing Set All Empties to {_cards[i].value} because DEFAULT.";
-            }
-            // Normal cards
-            else if (_cards[i].value > boardFromCard.value) // Raise the board value?
-            {
-                // It's a good idea to raise the board value if the player has bets on it
-                _cards[i].goodChoice = (_boards.FirstOrDefault(b => b.boardNumber == _cards[i].boardNumber).playerBets[playerIndex] > 0) && !boardFromCard.isLocked;
-                reasoning[i] = (_cards[i].goodChoice) ? $"PLAYER {gameManager.turn}: Playing {_cards[i].boardNumber}:{_cards[i].value} because I want to raise the value of a board I have bets on." : "BAD CHOICE";
-            }
-            else if (_cards[i].value <= boardFromCard.value && _cards[i].value > 0) // Lower the board value?
-            {
-                // It's a good idea to lower the board value if other players have bets on the board
-                int otherPlayerBets = 0;
-                foreach (int amountOfBets in _boards.FirstOrDefault(b => b.boardNumber == _cards[i].boardNumber).playerBets)
-                {
-                    otherPlayerBets += amountOfBets;
-                }
-                _cards[i].goodChoice = _boards.FirstOrDefault(b => b.boardNumber == _cards[i].boardNumber).playerBets[playerIndex] == 0 && otherPlayerBets > 0 && !boardFromCard.isLocked;
-                reasoning[i] = (_cards[i].goodChoice) ? $"PLAYER {gameManager.turn}: Playing {_cards[i].boardNumber}:{_cards[i].value} because I want to lower the value of a board I have no bets on." : "BAD CHOICE";
-            }
-            else if (_cards[i].value == -1 || _cards[i].value == 0) // Lock the board? Randomise the board value?
-            {
-                // It's a good idea to lock the board if the player has bets on the board AND it currently has a relatively high number
-                _cards[i].goodChoice = _boards.FirstOrDefault(b => b.boardNumber == _cards[i].boardNumber).playerBets[playerIndex] > 0 && Array.IndexOf(OrderBoards(), _boards.FirstOrDefault(b => b.boardNumber == _cards[i].boardNumber)) / _boards.Length <= 0.5f;
-                reasoning[i] = (_cards[i].goodChoice) ? $"PLAYER {gameManager.turn}: Playing {_cards[i].boardNumber}:{_cards[i].value} because I want to lock this board with my bets on it with a high value." : "BAD CHOICE";
-                if (_cards[i].goodChoice)
-                {
-                    continue;
-                }
-
-                // It's a good idea to lock the board if the player has NO bets on the board AND it currently has a relatively low number
-                _cards[i].goodChoice = _boards.FirstOrDefault(b => b.boardNumber == _cards[i].boardNumber).playerBets[playerIndex] == 0 && Array.IndexOf(OrderBoards(), _boards.FirstOrDefault(b => b.boardNumber == _cards[i].boardNumber)) / _boards.Length >= 0.5f;
-                reasoning[i] = (_cards[i].goodChoice) ? $"PLAYER {gameManager.turn}: Playing {_cards[i].boardNumber}:{_cards[i].value} because I want to lock this board with none of my bets on it with a low value." : "BAD CHOICE";
-            }*/
-        }
-
-        Debug.Log(_cardStats);
-        
-        // Decide which card strategy to go with
-        int maxValue = _cards.Max(c => c.goodChoice);
-        CardStatus[] highestValueCards = _cards.Where(c => c.goodChoice == maxValue).ToArray();
-        finalChoice[1] = highestValueCards[UnityEngine.Random.Range(0, highestValueCards.Length)].cardIndex;
 
         // Determine which boards are playable
-        BoardStatus[] availableBoards = _boards.Where(b => !b.isLocked && b.playerBets.Sum() < gameManager.maxBet).ToArray();
-
-        // Place a bet
-        if (availableBoards.Any())
+        if (gameManager.boards.Where(b => !b.isLocked && b.bets.Count < gameManager.maxBet).ToArray().Length > 0)
         {
             yield return new WaitForSeconds(1.0f);
 
-            // Update the board with the value that will be changed by the card played
-            if (_cards[finalChoice[1]].boardNumber > -1)
+            // Pick a board
+            Board selectedBoard = gameManager.boards[UnityEngine.Random.Range(0, gameManager.boards.Count)];
+            int selectedBoardValue = (selectedBoard.boardNumber == cardBoardNumber) ? cardValue : selectedBoard.value;
+            int errorCount = 0;
+            bool searchingTop = true; // First 10 iterations focus on top boards
+
+            while (errorCount < 20)
             {
-                BoardStatus tempBoard = availableBoards.FirstOrDefault(ab => ab.boardNumber == _cards[finalChoice[1]].boardNumber);
-                if (tempBoard != null)
+                // Update the chosen board value
+                selectedBoardValue = (selectedBoard.boardNumber == cardBoardNumber) ? cardValue : selectedBoard.value;
+
+                // Check if the board is valid
+                bool isValid = searchingTop 
+                    ? BoardInTop2(selectedBoardValue) && !selectedBoard.isLocked && selectedBoard.bets.Count < gameManager.maxBet // First 10 tries: only pick from the top
+                    : !selectedBoard.isLocked && selectedBoard.bets.Count < gameManager.maxBet; // After 10 tries: pick any valid board
+
+                if (isValid)
+                    break; // Exit loop when a valid board is found
+
+                // Pick a new board randomly
+                selectedBoard = gameManager.boards[UnityEngine.Random.Range(0, gameManager.boards.Count)];
+                errorCount++;
+
+                // After failed attempts, allow picking any valid board
+                if (errorCount == 10) // Switch to checking any valid board after 10 attempts
                 {
-                    Debug.Log($"From {tempBoard.value}");
-                    tempBoard.value = _cards[finalChoice[1]].value;
-                    Debug.Log($"To {tempBoard.value}");
+                    searchingTop = false;
+                    Debug.Log("Switching to any available board.");
                 }
             }
 
-            // Determine which boards are a good choice to bet on
-            string boardOptions = $"-- PLAYER {gameManager.turn} --\n";
-            for (int i = 0; i < availableBoards.Length; i++)
+            // Fatal error handling if no board is found after 20 tries
+            if (errorCount >= 20)
             {
-                availableBoards[i].goodChoice = (availableBoards[i].value > 0) ? 1.0f - Array.IndexOf(OrderBoards(availableBoards), availableBoards[i]) / availableBoards.Length : 0;
-                boardOptions += $"BOARD {availableBoards[i].boardNumber} = {availableBoards[i].goodChoice}\n";
+                Debug.LogError("ERROR: While loop fatal error! No valid board found.");
             }
 
-            // Choose a board to bet on
-            float threshold = 0.5f;
-            BoardStatus[] highestValueBoards = availableBoards.Where(b => b.goodChoice > threshold).ToArray();
-            finalChoice[0] = (highestValueBoards.Length > 0) ? highestValueBoards[UnityEngine.Random.Range(0, highestValueBoards.Length)].boardNumber: 0;
-            Debug.Log(boardOptions);
-
-            // Update board values according to the card thats going to be played
-            /*if (_cards[finalChoice[1]].boardNumber > -1)
-            {
-                _boards.FirstOrDefault(b => b.boardNumber == _cards[finalChoice[1]].boardNumber).value = (_cards[finalChoice[1]].value > 0) ? _cards[finalChoice[1]].value : _boards.FirstOrDefault(b => b.boardNumber == _cards[finalChoice[1]].boardNumber).value;
-            }
-
-            // Determine which boards are a good choice to bet on
-            for (int i = 0; i < availableBoards.Count; i++)
-            {
-                // Bet on boards with higher numbers unless you're going to change the value to higher
-                BoardStatus[] orderByValue = OrderBoards();
-                _boards[i].goodChoice = _boards[i].value > 0 && Array.IndexOf(orderByValue, availableBoards[i]) / orderByValue.Length <= 0.5f;
-
-                // Don't bet on a board if you're lowering its value
-                _boards[i].goodChoice = _boards[i].boardNumber == _cards[finalChoice[1]].boardNumber && _boards[i].value < gameManager.boards[i].value;
-            }
-
-            // Choose a board to bet on
-            finalChoice[0] = UnityEngine.Random.Range(0, availableBoards.Count);
-            int count = 0;
-            while (!availableBoards[finalChoice[0]].goodChoice)
-            {
-                finalChoice[0] = UnityEngine.Random.Range(0, availableBoards.Count);
-                count++;
-
-                if (count == 100)
-                {
-                    Debug.Log("No good choice boards...");
-                    break;
-                }
-            }*/
+            // Assign final choice
+            finalChoice[0] = selectedBoard.boardNumber;
 
             // Play sound
             AudioManager.Play("chip0", "chip1", "chip2");
@@ -342,20 +204,15 @@ public class AI : MonoBehaviour
             }
 
             // Place chip
-            Board selectedBoard = gameManager.boards.FirstOrDefault(b => b.boardNumber == availableBoards[finalChoice[0]].boardNumber);
+            Debug.Log($"FINAL CHOICE: {finalChoice[0]}");
+            selectedBoard = (selectedBoard == null) ? gameManager.boards[UnityEngine.Random.Range(0, gameManager.boards.Count)] : selectedBoard;
             selectedBoard.bets.Add(playerIndex);
             selectedBoard.betMarkers[selectedBoard.bets.Count - 1].GetComponent<Animator>().enabled = true;
         }
 
         // Play card and end the turn
         yield return new WaitForSeconds(1.0f);
-        FindFirstObjectByType<Card>().PlayCard(_cards[finalChoice[1]].boardNumber, _cards[finalChoice[1]].value, finalChoice[1]);
-    }
-
-    BoardStatus[] OrderBoards()
-    {
-        // Order boards by value from highest to lowest value
-        return _boards.OrderByDescending(b => b.value).ToArray();
+        FindFirstObjectByType<Card>().PlayCard(cardBoardNumber, cardValue, finalChoice[1]);
     }
 
     BoardStatus[] OrderBoards(BoardStatus[] list)
@@ -370,31 +227,132 @@ public class AI : MonoBehaviour
         return list.OrderByDescending(b => b.value).ToArray();
     }
 
-    BoardStatus[] OrderBoards(int _playerIndex)
+    bool LowestValueBoard(int boardIndex)
     {
-        // Order boards by number of bets placed by a specific player
-        return _boards.OrderByDescending(b => b.playerBets[_playerIndex]).ToArray();
-    }
+        if (boardIndex < 0 && boardIndex > 5)
+        {
+            return false;
+        }
 
-    bool LowestValue(int boardIndex)
-    {
         int lowest = 9;
-        for (int i = 0; i < _boards.Length; i++)
+        for (int i = 0; i < gameManager.boards.Count; i++)
         {
-            lowest = (_boards[i].value < lowest) ? _boards[i].value : lowest;
+            lowest = (gameManager.boards[i].value < lowest) ? gameManager.boards[i].value : lowest;
         }
 
-        return _boards[boardIndex].value == lowest;
+        Debug.Log($"Lowest Value: {lowest}");
+        return gameManager.boards.FirstOrDefault(b => b.boardNumber == boardIndex).value == lowest;
     }
 
-    bool HighestValue(int boardIndex)
+    bool LowestPlayerScore(int playerIndex)
     {
-        int highest = 0;
-        for (int i = 0; i < _boards.Length; i++)
+        int lowest = 100;
+        foreach (PlayerEntry player in gameManager.players)
         {
-            highest = (_boards[i].value > highest) ? _boards[i].value : highest;
+            lowest = (player.gameObject.activeInHierarchy && player.score < lowest) ? player.score : lowest;
         }
 
-        return _boards[boardIndex].value == highest;
+        return gameManager.players[playerIndex].score == lowest;
+    }
+
+    int BoardPlayerBets(int playerIndex, Board board)
+    {
+        int count = 0;
+
+        if (board.bets.Count == 0)
+        {
+            return 0;
+        }
+
+        foreach (int bet in board.bets)
+        {
+            count += bet == playerIndex ? 1 : 0;
+        }
+
+        return count;
+    }
+
+    Board GetHighestBoard()
+    {
+        Board result = null;
+
+        foreach (Board board in gameManager.boards)
+        {
+            result = ((result == null || result.value < board.value) && board.gameObject.activeInHierarchy) ? board : result;
+        }
+
+        return result;
+    }
+
+    Board GetLowestBoard()
+    {
+        Board result = null;
+
+        foreach (Board board in gameManager.boards)
+        {
+            if (board.value == 0)
+            {
+                continue;
+            }
+
+            result = ((result == null || result.value > board.value) && board.gameObject.activeInHierarchy) ? board : result;
+        }
+
+        if (result == null)
+        {
+            result = gameManager.boards[0];
+        }
+
+        return result;
+    }
+
+    bool BoardInTop1(int value)
+    {
+        int first = -1;
+
+        foreach (Board board in gameManager.boards)
+        {
+            first = board.value > first ? board.value : first;
+        }
+
+        return value == first;
+    }
+
+    bool BoardInTop2(int value)
+    {
+        int first = -1;
+        int second = -1;
+
+        foreach (Board board in gameManager.boards)
+        {
+            if (board.value < second)
+            {
+                continue;
+            }
+
+            if (board.value > first)
+            {
+                second = first;
+                first = board.value;
+            }
+            else
+            {
+                second = board.value;
+            }
+        }
+
+        return value == first || value == second;
+    }
+
+    int AmountOfEmptyBoards()
+    {
+        int result = 0;
+
+        foreach (Board board in gameManager.boards)
+        {
+            result += board.value > 0 ? 1 : 0;
+        }
+
+        return result;
     }
 }
