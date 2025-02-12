@@ -96,7 +96,8 @@ public class Card : MonoBehaviour
 
     public void PlayCard(int _index, int _value, int _cardIndex)
     {
-        Debug.Log($"{_index}:{_value}");
+        hand.canPlayCard = false;
+
         // Play card
         if (_index > - 1 && _value > -1)
         {

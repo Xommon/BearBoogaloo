@@ -12937,6 +12937,7 @@ MonoBehaviour:
   levelDisplay: {fileID: 62631877}
   levelSlider: {fileID: 148882572}
   leaderboardObject: {fileID: 1955971765}
+  pointMaxes: 32000000c8000000f4010000e8030000e9030000
 --- !u!82 &1573179416
 AudioSource:
   m_ObjectHideFlags: 0

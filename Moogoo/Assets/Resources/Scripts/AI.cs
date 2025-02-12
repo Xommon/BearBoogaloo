@@ -3,10 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System;
-using NUnit.Framework.Interfaces;
-using System.Threading;
-using Mono.Cecil;
-using System.Runtime.ExceptionServices;
 
 public class BoardStatus
 {
@@ -90,6 +86,13 @@ public class AI : MonoBehaviour
                 cardBoard = gameManager.boards.FirstOrDefault(b => b.boardNumber == cardBoardNumber);
             }
 
+            // Go with random card if difficulty is easy
+            if (gameManager.totalPoints < gameManager.pointMaxes[0])
+            {
+                goodChoice = true;
+                break;
+            }
+
             // Assess if it's a good choice
             if ( // Raise
                 cardBoardNumber > 0 && cardBoardNumber < 5 && // Normal card
@@ -166,9 +169,30 @@ public class AI : MonoBehaviour
                 selectedBoardValue = (selectedBoard.boardNumber == cardBoardNumber) ? cardValue : selectedBoard.value;
 
                 // Check if the board is valid
-                bool isValid = searchingTop 
-                    ? BoardInTop2(selectedBoardValue) && !selectedBoard.isLocked && selectedBoard.bets.Count < gameManager.maxBet // First 10 tries: only pick from the top
+                bool isValid = false;
+                if (gameManager.totalPoints < gameManager.pointMaxes[0])
+                {
+                    Debug.Log("EASY");
+                    isValid = searchingTop 
+                    ? BoardInTop(6, selectedBoardValue) && !selectedBoard.isLocked && selectedBoard.bets.Count < gameManager.maxBet // First 10 tries: only pick from the top
                     : !selectedBoard.isLocked && selectedBoard.bets.Count < gameManager.maxBet; // After 10 tries: pick any valid board
+                }
+                else if (gameManager.totalPoints < gameManager.pointMaxes[1])
+                {
+                    // Normal difficulty
+                    Debug.Log("NORMAL");
+                    isValid = searchingTop 
+                    ? BoardInTop(2, selectedBoardValue) && !selectedBoard.isLocked && selectedBoard.bets.Count < gameManager.maxBet // First 10 tries: only pick from the top
+                    : !selectedBoard.isLocked && selectedBoard.bets.Count < gameManager.maxBet; // After 10 tries: pick any valid board
+                }
+                else if (gameManager.totalPoints < gameManager.pointMaxes[3])
+                {
+                    Debug.Log("HARD");
+                    // Hard difficulty
+                    isValid = searchingTop 
+                    ? BoardInTop(1, selectedBoardValue) && !selectedBoard.isLocked && selectedBoard.bets.Count < gameManager.maxBet // First 10 tries: only pick from the top
+                    : !selectedBoard.isLocked && selectedBoard.bets.Count < gameManager.maxBet; // After 10 tries: pick any valid board
+                }
 
                 if (isValid)
                     break; // Exit loop when a valid board is found
@@ -306,42 +330,25 @@ public class AI : MonoBehaviour
         return result;
     }
 
-    bool BoardInTop1(int value)
+    bool BoardInTop(int inTop, int boardNumber)
     {
-        int first = -1;
+        // Get the values
+        Board[] tempBoards = gameManager.boards.Where(b => b.gameObject.activeInHierarchy).OrderByDescending(b => b.value).ToArray();
 
-        foreach (Board board in gameManager.boards)
+        for (int i = 0; i < inTop; i++)
         {
-            first = board.value > first ? board.value : first;
-        }
-
-        return value == first;
-    }
-
-    bool BoardInTop2(int value)
-    {
-        int first = -1;
-        int second = -1;
-
-        foreach (Board board in gameManager.boards)
-        {
-            if (board.value < second)
+            if (i >= tempBoards.Length - 1)
             {
-                continue;
+                return false;
             }
 
-            if (board.value > first)
+            if (tempBoards[i].boardNumber == boardNumber)
             {
-                second = first;
-                first = board.value;
-            }
-            else
-            {
-                second = board.value;
+                return true;
             }
         }
 
-        return value == first || value == second;
+        return false;
     }
 
     int AmountOfEmptyBoards()

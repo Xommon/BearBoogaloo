@@ -74,12 +74,13 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI belowText;
 
     // Level
-    [Range(0, 10000)]
+    [Range(0, 1000)]
     public int totalPoints;
     public int tempPoints;
     public TextMeshProUGUI levelDisplay;
     public Slider levelSlider;
     public Transform leaderboardObject;
+    public int[] pointMaxes = new int[]{50, 200, 500, 1001};
 
     void Start()
     {
@@ -89,6 +90,11 @@ public class GameManager : MonoBehaviour
         playersAnimator.enabled = false;
         boardsAnimator.enabled = false;
         round = 3;
+
+        // DEBUG
+        /*PlayerPrefs.SetInt("TotalPoints", 0);
+        PlayerPrefs.Save();
+        totalPoints = PlayerPrefs.GetInt("TotalPoints", 0);*/
 
         // Play music
         AudioManager.PlayMusic("Music0");
@@ -125,18 +131,9 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        //DEBUG Reset points
-        if (Input.GetKeyDown(KeyCode.RightAlt))
-        {
-            PlayerPrefs.SetInt("TotalPoints", 0);
-            PlayerPrefs.Save();
-            totalPoints = PlayerPrefs.GetInt("TotalPoints", 0);
-        }
-
         // Level
-        int[] pointMaxes = new int[]{500, 1500, 4000, 10001};
         int tempTotal = 0;
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 5; i++)
         {
             if (i > 0)
             {   
@@ -197,7 +194,7 @@ public class GameManager : MonoBehaviour
         // Disable card buttons when it's not your turn
         foreach (Card card in hand.cards)
         {
-            card.button.interactable = (turn == 0 && hand.canPlayCard && !bettingTime);
+            card.button.interactable = turn == 0 && hand.canPlayCard && !bettingTime;
         }
 
         // Count the amount of boards enabled
@@ -500,8 +497,8 @@ public class GameManager : MonoBehaviour
         deck.Clear();
 
         // Build a new deck
-        //int minValue = totalPoints > points
-        for (int i = -1; i < 10; i++)
+        int minValue = totalPoints >= pointMaxes[2] ? -1 : 0;
+        for (int i = minValue; i < 10; i++)
         {
             for (int i2 = 0; i2 < boards.Count(obj => obj.gameObject.activeInHierarchy); i2++)
             {
@@ -513,10 +510,16 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < 3; i++)
         {
             // Randomise values
-            deck.Add("-1:0");
+            if (totalPoints >= pointMaxes[2])
+            {
+                deck.Add("-1:0");
+            }
 
             // Set current values to #
-            deck.Add($"-2:{UnityEngine.Random.Range(1, 10)}");
+            if (totalPoints >= pointMaxes[3])
+            {
+                deck.Add($"-2:{UnityEngine.Random.Range(1, 10)}");
+            }
         }
 
         // Shuffle deck
@@ -676,7 +679,7 @@ public class GameManager : MonoBehaviour
         ScoreEntry[] leaderboard = leaderboardObject.GetComponentsInChildren<ScoreEntry>();
         Array.Reverse(leaderboard);
         int playerPlace = leaderboard.FirstOrDefault(s => s.scoreIndex == 0).transform.GetSiblingIndex() + 1;
-        tempPoints = (playerPlace == activePlayers) ? totalPoints + playerPlace * 120 : totalPoints + playerPlace * 100;
+        tempPoints = (playerPlace == activePlayers) ? totalPoints + playerPlace * 12 : totalPoints + playerPlace * 10;
         
         // Move level bar to end game screen
         levelSlider.transform.parent = endGameWindow.transform;
@@ -704,7 +707,7 @@ public class GameManager : MonoBehaviour
         {
             yield return new WaitForSeconds(0.01f);
         }
-        
+
         totalPoints++;
 
         if (tempPoints > totalPoints)
