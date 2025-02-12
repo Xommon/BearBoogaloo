@@ -67,8 +67,14 @@ public class GameManager : MonoBehaviour
     [Range(1,4)]
     public int difficulty;
 
+    // Help
+    public GameObject helpWindow;
+    public int helpIndex;
+    public TextMeshProUGUI aboveText;
+    public TextMeshProUGUI belowText;
+
     // Level
-    [Range(0, 1200)]
+    [Range(0, 10000)]
     public int totalPoints;
     public int tempPoints;
     public TextMeshProUGUI levelDisplay;
@@ -119,8 +125,16 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        //DEBUG Reset points
+        if (Input.GetKeyDown(KeyCode.RightAlt))
+        {
+            PlayerPrefs.SetInt("TotalPoints", 0);
+            PlayerPrefs.Save();
+            totalPoints = PlayerPrefs.GetInt("TotalPoints", 0);
+        }
+
         // Level
-        int[] pointMaxes = new int[]{500, 750, 1130, 1700, 2500, 3750, 5500, 8500, 12000};
+        int[] pointMaxes = new int[]{500, 1500, 4000, 10001};
         int tempTotal = 0;
         for (int i = 0; i < 10; i++)
         {
@@ -136,6 +150,12 @@ public class GameManager : MonoBehaviour
                 levelSlider.value = (float)(totalPoints - previousMax) / (pointMaxes[i] - previousMax);
                 break;
             }
+        }
+
+        // Open settings window
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            ToggleSettingsWindow();
         }
 
         // Update settings
@@ -480,6 +500,7 @@ public class GameManager : MonoBehaviour
         deck.Clear();
 
         // Build a new deck
+        //int minValue = totalPoints > points
         for (int i = -1; i < 10; i++)
         {
             for (int i2 = 0; i2 < boards.Count(obj => obj.gameObject.activeInHierarchy); i2++)
@@ -637,7 +658,7 @@ public class GameManager : MonoBehaviour
         AudioManager.Play("UI1");
 
         // Update text
-        languageIndex = (languageIndex == 3) ? 0 : languageIndex + 1;
+        languageIndex = (languageIndex == 2) ? 0 : languageIndex + 1;
         startButton.GetComponentInChildren<TextMeshProUGUI>().text = Language.language[10, languageIndex];
         for (int i = 0; i < settingsLabels.Length; i++)
         {
@@ -715,6 +736,7 @@ public class GameManager : MonoBehaviour
         AudioManager.Play("UI1");
 
         settingsWindow.SetActive(!settingsWindow.activeInHierarchy);
+        helpWindow.SetActive(settingsWindow.activeInHierarchy ? helpWindow.activeInHierarchy : false);
         Time.timeScale = (settingsWindow.activeInHierarchy) ? 0 : 1;
 
         // Save settings
@@ -722,6 +744,14 @@ public class GameManager : MonoBehaviour
         PlayerPrefs.SetFloat("Sound", soundSlider.value);
         PlayerPrefs.SetFloat("Music", musicSlider.value);
         PlayerPrefs.Save();
+    }
+
+    public void ToggleHelpWindow()
+    {
+        // Play sound
+        AudioManager.Play("UI1");
+
+        helpWindow.SetActive(!helpWindow.activeInHierarchy);
     }
 
     public void UIButton()

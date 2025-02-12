@@ -49,10 +49,10 @@ public class PlayerEntry : MonoBehaviour
         scoreDisplay.text = Language.language[score, gameManager.languageIndex];
 
         // Switch to RTL or LTR
-        scoreRT.anchoredPosition = (gameManager.languageIndex > 1) ? new Vector2(-55, 0) : new Vector2(100, 0);
+        /*scoreRT.anchoredPosition = (gameManager.languageIndex > 1) ? new Vector2(-55, 0) : new Vector2(100, 0);
         iconRT.anchoredPosition = (gameManager.languageIndex > 1) ? new Vector2(55, -1) : new Vector2(-92, -1);
         nameDisplay.isRightToLeftText = gameManager.languageIndex > 1;
-        nameDisplay.alignment = gameManager.languageIndex > 1 ? TextAlignmentOptions.Right : TextAlignmentOptions.Left;
+        nameDisplay.alignment = gameManager.languageIndex > 1 ? TextAlignmentOptions.Right : TextAlignmentOptions.Left;*/
 
         // Highlight when it's the player's turn
         background.color = (gameManager.turn == transform.GetSiblingIndex()) ? new Color(1.0f, 0.88f, 0.0f, 1.0f) : background.color = new Color(0.53f, 0.65f, 0.72f, 0.75f);
